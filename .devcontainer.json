@@ -1,5 +1,6 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "name": "app-anti-gaspillage",
+    "image": "mcr.microsoft.com/devcontainers/go",
     "features": {
       "ghcr.io/devcontainers/features/docker-in-docker:2": {}
     },
@@ -8,9 +9,9 @@
         "extensions": [
           "github.copilot",
           "golang.go",
-          "ms-azuretools.vscode-docker",
-          "mtxr.sqltools",
-          "mtxr.sqltools-driver-pg"
+          "ms-ossdata.vscode-postgresql",
+          "eamodio.gitlens", 
+          "esbenp.prettier-vscode"
         ]
       }
     }
