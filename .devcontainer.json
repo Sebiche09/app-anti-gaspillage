@@ -1,0 +1,17 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "github.copilot",
+          "golang.go",
+          "ms-azuretools.vscode-docker",
+          "mtxr.sqltools",
+          "mtxr.sqltools-driver-pg"
+        ]
+      }
+    }
+}
