@@ -7,11 +7,13 @@
     "customizations": {
       "vscode": {
         "extensions": [
-          "github.copilot",
-          "golang.go",
-          "ms-ossdata.vscode-postgresql",
-          "eamodio.gitlens", 
-          "esbenp.prettier-vscode"
+            "github.copilot",
+            "golang.go",
+            "ms-ossdata.vscode-postgresql",
+            "eamodio.gitlens",
+            "esbenp.prettier-vscode",
+            "cweijan.dbclient-jdbc",
+            "cweijan.vscode-database-client2"
         ]
       }
     }

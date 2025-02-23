@@ -2,6 +2,6 @@ FROM postgres:15
 
 ENV POSTGRES_USER=user
 ENV POSTGRES_PASSWORD=password
-ENV POSTGRES_DB=mydatabase
+ENV POSTGRES_DB=anti_gaspillage
 
 EXPOSE 5432

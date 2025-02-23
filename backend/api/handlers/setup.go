@@ -7,8 +7,9 @@ import (
 )
 
 type Handlers struct {
-	User   *UserHandler
-	Basket *BasketHandler
+	User     *UserHandler
+	Basket   *BasketHandler
+	Merchant *MerchantHandler
 }
 
 func NewHandlers(db *gorm.DB) *Handlers {
@@ -20,8 +21,13 @@ func NewHandlers(db *gorm.DB) *Handlers {
 	basketService := services.NewBasketService(basketRepo)
 	basketHandler := NewBasketHandler(basketService)
 
+	merchantRepo := repositories.NewMerchantRepository(db)
+	merchantService := services.NewMerchantService(merchantRepo)
+	merchantHandler := NewMerchantHandler(merchantService)
+
 	return &Handlers{
-		User:   userHandler,
-		Basket: basketHandler,
+		User:     userHandler,
+		Basket:   basketHandler,
+		Merchant: merchantHandler,
 	}
 }

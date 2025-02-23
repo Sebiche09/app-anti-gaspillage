@@ -15,6 +15,140 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admin/merchant-requests": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Récupère toutes les demandes de marchand en attente (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin",
+                    "Merchants"
+                ],
+                "summary": "Récupérer les demandes en attente",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des demandes en attente",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.MerchantRequest"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/merchant-requests/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un administrateur d'approuver ou rejeter une demande de marchand",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin",
+                    "Merchants"
+                ],
+                "summary": "Traiter une demande de marchand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID de la demande",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Statut de la demande (approved/rejected)",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ProcessRequestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Demande traitée avec succès",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "ID invalide ou statut invalide",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "Authenticate a user using email and password",
@@ -412,6 +546,76 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/merchants/request": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un utilisateur de soumettre une demande pour devenir marchand",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchants"
+                ],
+                "summary": "Créer une demande de marchand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Données de la demande",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.CreateMerchantRequestInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -424,6 +628,23 @@ const docTemplate = `{
                 "valid": {
                     "description": "Valid is true if Time is not NULL",
                     "type": "boolean"
+                }
+            }
+        },
+        "handlers.ProcessRequestInput": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "description": "Status de la demande (approved/rejected)",
+                    "type": "string",
+                    "enum": [
+                        "approved",
+                        "rejected"
+                    ],
+                    "example": "approved"
                 }
             }
         },
@@ -478,6 +699,15 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Message d'erreur"
+                }
+            }
+        },
         "models.Merchant": {
             "type": "object",
             "required": [
@@ -503,20 +733,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "identity_card_file": {
-                    "description": "Optionnel : fichier Carte d'identité",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "kbis_file": {
-                    "description": "Optionnel : fichier KBIS",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "phone_number": {
                     "description": "Numéro de téléphone (optionnel, max 15 caractères)",
                     "type": "string"
@@ -539,6 +755,61 @@ const docTemplate = `{
                 "user_id": {
                     "description": "Relation 1 à 1 vers User",
                     "type": "integer"
+                }
+            }
+        },
+        "models.MerchantRequest": {
+            "type": "object",
+            "required": [
+                "business_name",
+                "email_pro",
+                "siret"
+            ],
+            "properties": {
+                "business_name": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "email_pro": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "siret": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "pending, approved, rejected",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "user_id": {
+                    "description": "Relation avec l'utilisateur qui fait la demande",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "Opération réussie"
                 }
             }
         },
@@ -635,6 +906,32 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "requests.CreateMerchantRequestInput": {
+            "type": "object",
+            "required": [
+                "business_name",
+                "email_pro",
+                "siret"
+            ],
+            "properties": {
+                "business_name": {
+                    "type": "string",
+                    "example": "petit bateau"
+                },
+                "email_pro": {
+                    "type": "string",
+                    "example": "merchant@example.com"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+32452101010"
+                },
+                "siret": {
+                    "type": "string",
+                    "example": "78467169500087"
                 }
             }
         },

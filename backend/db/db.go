@@ -17,7 +17,7 @@ func Init() *gorm.DB {
 
 	db.AutoMigrate(&models.Basket{})
 	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Merchant{})
+	db.AutoMigrate(&models.Merchant{}, &models.MerchantRequest{})
 	db.AutoMigrate(&models.Notification{})
 	return db
 
