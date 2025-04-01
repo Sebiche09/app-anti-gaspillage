@@ -15,10 +15,37 @@ func Init() *gorm.DB {
 		panic("failed to connect database")
 	}
 
-	db.AutoMigrate(&models.Basket{})
-	db.AutoMigrate(&models.User{})
-	db.AutoMigrate(&models.Merchant{}, &models.MerchantRequest{})
-	db.AutoMigrate(&models.Notification{})
+	// Auto-migrations
+	db.AutoMigrate(
+		&models.Basket{},
+		&models.User{},
+		&models.Merchant{},
+		&models.MerchantRequest{},
+		&models.Notification{},
+		&models.Restaurant{},
+		&models.RestaurantStaff{},
+		&models.Invitation{},
+		&models.Category{},
+	)
+	initDefaultCategories(db)
 	return db
 
+}
+
+func initDefaultCategories(db *gorm.DB) {
+	defaultCategories := []models.Category{
+		{Name: "Boulangerie"},
+		{Name: "Epicerie"},
+		{Name: "Sushi"},
+		{Name: "Végétarien"},
+	}
+
+	for _, category := range defaultCategories {
+		var existingCategory models.Category
+		result := db.Where("name = ?", category.Name).First(&existingCategory)
+
+		if result.RowsAffected == 0 {
+			db.Create(&category)
+		}
+	}
 }

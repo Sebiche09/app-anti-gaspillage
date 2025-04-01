@@ -54,12 +54,62 @@ definitions:
     - quantity
     - type
     type: object
+  models.Category:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   models.ErrorResponse:
     properties:
       error:
         example: Message d'erreur
         type: string
     type: object
+  models.Invitation:
+    properties:
+      code:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      expiresAt:
+        type: string
+      id:
+        type: integer
+      restaurant:
+        $ref: '#/definitions/models.Restaurant'
+      restaurantID:
+        type: integer
+      role:
+        type: string
+      sender:
+        $ref: '#/definitions/models.User'
+      senderID:
+        type: integer
+      status:
+        $ref: '#/definitions/models.InvitationStatus'
+      token:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.InvitationStatus:
+    enum:
+    - PENDING
+    - ACCEPTED
+    - REJECTED
+    - EXPIRED
+    type: string
+    x-enum-varnames:
+    - InvitationPending
+    - InvitationAccepted
+    - InvitationRejected
+    - InvitationExpired
   models.Merchant:
     properties:
       business_name:
@@ -137,6 +187,13 @@ definitions:
       address:
         description: Adresse complète
         type: string
+      category:
+        allOf:
+        - $ref: '#/definitions/models.Category'
+        description: Relation avec Category (clé étrangère)
+      category_id:
+        description: ID de la catégorie (clé étrangère)
+        type: integer
       city:
         description: Ville
         type: string
@@ -162,6 +219,9 @@ definitions:
       postal_code:
         description: Code postal (limité à 10 caractères pour compatibilité internationale)
         type: string
+      rating:
+        description: Note moyenne (sur 5)
+        type: number
       siren:
         description: SIREN (exactement 9 chiffres, unique)
         type: string
@@ -199,7 +259,41 @@ definitions:
     - password_hash
     - phone
     type: object
-  requests.CreateMerchantRequestInput:
+  requests.CreateBasketRequest:
+    properties:
+      description:
+        example: Ceci est un panier suprise
+        type: string
+      expiration_date:
+        example: "2022-12-31"
+        type: string
+      name:
+        example: panier surprise
+        type: string
+      original_price:
+        example: 22
+        type: number
+      price:
+        example: 8.99
+        type: number
+      quantity:
+        example: 2
+        type: integer
+      restaurant_id:
+        example: 1
+        type: integer
+      type:
+        example: surprise
+        type: string
+    required:
+    - name
+    - original_price
+    - price
+    - quantity
+    - restaurant_id
+    - type
+    type: object
+  requests.CreateMerchantRequest:
     properties:
       business_name:
         example: petit bateau
@@ -217,6 +311,33 @@ definitions:
     - business_name
     - email_pro
     - siret
+    type: object
+  requests.CreateRestaurantRequest:
+    properties:
+      address:
+        description: Adresse complète
+        example: route de baduel 11
+        type: string
+      city:
+        description: Ville
+        example: cayenne
+        type: string
+      name:
+        description: Nom du restaurant (obligatoire)
+        example: petit bateau 1
+        type: string
+      phone_number:
+        description: Numéro de téléphone (optionnel, max 15 caractères)
+        example: "+32470542125"
+        type: string
+      postal_code:
+        description: Code postal (limité à 10 caractères pour compatibilité internationale)
+        example: "97300"
+        type: string
+      siren:
+        description: SIREN (exactement 9 chiffres, unique)
+        example: "123456789"
+        type: string
     type: object
   requests.LoginRequest:
     properties:
@@ -250,6 +371,74 @@ definitions:
     - full_name
     - password
     - phone
+    type: object
+  requests.UpdateMerchantRequest:
+    properties:
+      business_name:
+        description: Nom de l'entreprise
+        example: petit bateau update
+        type: string
+      email_pro:
+        description: Email valide requis
+        example: merchantupdate@example.com
+        type: string
+      phone_number:
+        example: "+32452101010"
+        type: string
+      siret:
+        description: Numéro SIRET
+        example: "78467169500089"
+        type: string
+    required:
+    - business_name
+    - email_pro
+    - siret
+    type: object
+  requests.UpdateRestaurantRequest:
+    properties:
+      address:
+        description: Adresse complète
+        example: route de baduel 12
+        type: string
+      city:
+        description: Ville
+        example: remire
+        type: string
+      name:
+        description: Nom du restaurant (obligatoire)
+        example: petit bateau 2
+        type: string
+      phone_number:
+        description: Numéro de téléphone (optionnel, max 15 caractères)
+        example: "+32470542125"
+        type: string
+      postal_code:
+        description: Code postal (limité à 10 caractères pour compatibilité internationale)
+        example: "97301"
+        type: string
+      siren:
+        description: SIREN (exactement 9 chiffres, unique)
+        example: "123456780"
+        type: string
+    type: object
+  responses.BasketResponse:
+    properties:
+      address:
+        type: string
+      category:
+        type: string
+      discountPrice:
+        type: number
+      id:
+        type: string
+      name:
+        type: string
+      originalPrice:
+        type: number
+      rating:
+        type: number
+      typeBasket:
+        type: string
     type: object
 info:
   contact: {}
@@ -289,7 +478,6 @@ paths:
       summary: Récupérer les demandes en attente
       tags:
       - Admin
-      - Merchants
   /api/admin/merchant-requests/{id}:
     put:
       consumes:
@@ -341,7 +529,72 @@ paths:
       summary: Traiter une demande de marchand
       tags:
       - Admin
-      - Merchants
+  /api/admin/merchants:
+    get:
+      description: Récupère tout les marchands (admin only)
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Liste des marchands
+          schema:
+            items:
+              $ref: '#/definitions/models.Merchant'
+            type: array
+        "401":
+          description: Non authentifié
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Non autorisé
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Erreur serveur
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Récupérer les marchands
+      tags:
+      - Admin
+  /api/admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get all users
+      tags:
+      - Admin
   /api/auth/login:
     post:
       consumes:
@@ -405,11 +658,17 @@ paths:
       summary: Create a new user
       tags:
       - Users
-  /api/baskets:
+  /api/baskets/:
     get:
       consumes:
       - application/json
       description: Retrieve a list of all baskets
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -417,7 +676,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Basket'
+              $ref: '#/definitions/responses.BasketResponse'
             type: array
         "500":
           description: Internal server error
@@ -425,6 +684,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - Bearer: []
       summary: Get all baskets
       tags:
       - Baskets
@@ -443,7 +704,7 @@ paths:
         name: basket
         required: true
         schema:
-          $ref: '#/definitions/models.Basket'
+          $ref: '#/definitions/requests.CreateBasketRequest'
       produces:
       - application/json
       responses:
@@ -523,6 +784,11 @@ paths:
       - application/json
       description: Retrieve a basket by its ID
       parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: Basket ID
         in: path
         name: id
@@ -534,7 +800,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Basket'
+            $ref: '#/definitions/responses.BasketResponse'
         "400":
           description: Invalid basket ID
           schema:
@@ -547,6 +813,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - Bearer: []
       summary: Get a single basket
       tags:
       - Baskets
@@ -600,7 +868,231 @@ paths:
       summary: Update a basket
       tags:
       - Baskets
-  /api/merchants/request:
+  /api/invitations:
+    post:
+      consumes:
+      - application/json
+      description: Permet à un marchand d'inviter une personne à rejoindre son restaurant
+        en tant que staff
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Informations de l'invitation
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            restaurant_id:
+              type: integer
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Invitation envoyée avec succès
+          schema:
+            properties:
+              code:
+                type: string
+              message:
+                type: string
+            type: object
+        "400":
+          description: Erreur dans la requête
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Non authentifié
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Accès non autorisé
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Envoyer une invitation à rejoindre un restaurant
+      tags:
+      - invitations
+  /api/invitations/{invitationId}:
+    delete:
+      description: Permet à un marchand d'annuler une invitation envoyée
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID de l'invitation
+        in: path
+        name: invitationId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation annulée avec succès
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Erreur dans la requête
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Non authentifié
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Annuler une invitation
+      tags:
+      - invitations
+  /api/invitations/accept:
+    get:
+      consumes:
+      - application/json
+      description: Permet à un utilisateur d'accepter une invitation à rejoindre un
+        restaurant en tant que staff
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Code d'invitation
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation acceptée avec succès
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Erreur dans la requête
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Non authentifié
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Accepter une invitation à rejoindre un restaurant
+      tags:
+      - invitations
+  /api/merchants:
+    delete:
+      consumes:
+      - application/json
+      description: Permet à un marchand de supprimer son compte
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Suppression d'un marchand
+      tags:
+      - Merchants
+    get:
+      description: Récupère les informations du marchand actuel
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Informations du marchand
+          schema:
+            $ref: '#/definitions/models.Merchant'
+        "401":
+          description: Non authentifié
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Non autorisé
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Marchand non trouvé
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Erreur serveur
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Récupérer information d'un marchand
+      tags:
+      - Merchants
     post:
       consumes:
       - application/json
@@ -616,7 +1108,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/requests.CreateMerchantRequestInput'
+          $ref: '#/definitions/requests.CreateMerchantRequest'
       produces:
       - application/json
       responses:
@@ -644,5 +1136,302 @@ paths:
       - Bearer: []
       summary: Créer une demande de marchand
       tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Permet à un marchand de mettre à jour ses informations
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Données du marchand
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateMerchantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Update un marchand
+      tags:
       - Merchants
+  /api/merchants/restaurants:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Données de la demande
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/requests.CreateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+  /api/merchants/restaurants/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Restaurant ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Données de la demande
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/requests.UpdateRestaurantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+  /api/restaurants:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+  /api/restaurants/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID du restaurant
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+  /api/restaurants/{restaurantId}/invitations:
+    get:
+      description: Permet à un marchand de voir toutes les invitations en attente
+        pour son restaurant
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID du restaurant
+        in: path
+        name: restaurantId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Liste des invitations en attente
+          schema:
+            items:
+              $ref: '#/definitions/models.Invitation'
+            type: array
+        "400":
+          description: Erreur dans la requête
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "401":
+          description: Non authentifié
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "403":
+          description: Accès non autorisé
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Récupérer les invitations en attente pour un restaurant
+      tags:
+      - invitations
 swagger: "2.0"

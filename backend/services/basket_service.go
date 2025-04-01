@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 
+	"github.com/Sebiche09/app-anti-gaspillage.git/api/requests"
 	"github.com/Sebiche09/app-anti-gaspillage.git/models"
 	"github.com/Sebiche09/app-anti-gaspillage.git/repositories"
 )
@@ -23,9 +24,19 @@ func (s *BasketService) GetBasket(id int) (*models.Basket, error) {
 	return s.BasketRepo.GetByID(id)
 }
 
-func (s *BasketService) CreateBasket(basket models.Basket, userId int) error {
-	// Affecte automatiquement le restaurant à l'utilisateur connecté
-	basket.RestaurantID = userId
+func (s *BasketService) CreateBasket(basketRequest requests.CreateBasketRequest, userId uint) error {
+	basket := models.Basket{
+		RestaurantID:   basketRequest.RestaurantID,
+		Name:           basketRequest.Name,
+		TypeBasket:     basketRequest.TypeBasket,
+		Description:    basketRequest.Description,
+		Price:          basketRequest.Price,
+		OriginalPrice:  basketRequest.OriginalPrice,
+		Quantity:       basketRequest.Quantity,
+		ExpirationDate: basketRequest.ExpirationDate,
+	}
+
+	// Passer le modèle au repository
 	return s.BasketRepo.Create(&basket)
 }
 

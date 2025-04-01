@@ -35,3 +35,35 @@ func (r *UserRepository) IsMerchant(userID uint) (bool, error) {
 
 	return merchantCount > 0, nil
 }
+
+func (r *UserRepository) GetStaffRestaurantIDs(userID uint) ([]uint, error) {
+	var restaurantIDs []uint
+
+	err := r.DB.Model(&models.RestaurantStaff{}).
+		Select("restaurant_id").
+		Where("user_id = ?", userID).
+		Pluck("restaurant_id", &restaurantIDs).
+		Error
+
+	return restaurantIDs, err
+}
+
+func (r *UserRepository) IsStaffOfRestaurant(userID, restaurantID uint) (bool, error) {
+	var staffCount int64
+
+	err := r.DB.Model(&models.RestaurantStaff{}).
+		Where("user_id = ? AND restaurant_id = ?", userID, restaurantID).
+		Count(&staffCount).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return staffCount > 0, nil
+}
+
+func (r *UserRepository) GetUsers() ([]models.User, error) {
+	var users []models.User
+	err := r.DB.Find(&users).Error
+	return users, err
+}

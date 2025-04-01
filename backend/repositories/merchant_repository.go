@@ -53,3 +53,26 @@ func (r *MerchantRepository) UpdateRequest(request *models.MerchantRequest) erro
 func (r *MerchantRepository) CreateMerchant(merchant *models.Merchant) error {
 	return r.db.Create(merchant).Error
 }
+
+func (r *MerchantRepository) GetMerchants() ([]models.Merchant, error) {
+	var merchants []models.Merchant
+	err := r.db.Find(&merchants).Error
+	return merchants, err
+}
+
+func (r *MerchantRepository) FindMerchantByUserID(userID uint) (*models.Merchant, error) {
+	var merchant models.Merchant
+	err := r.db.Where("user_id = ?", userID).First(&merchant).Error
+	if err != nil {
+		return nil, err
+	}
+	return &merchant, nil
+}
+
+func (r *MerchantRepository) UpdateMerchant(merchant *models.Merchant) error {
+	return r.db.Save(merchant).Error
+}
+
+func (r *MerchantRepository) DeleteMerchant(merchant *models.Merchant) error {
+	return r.db.Delete(merchant).Error
+}

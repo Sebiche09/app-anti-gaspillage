@@ -27,8 +27,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Admin",
-                    "Merchants"
+                    "Admin"
                 ],
                 "summary": "Récupérer les demandes en attente",
                 "parameters": [
@@ -86,8 +85,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Admin",
-                    "Merchants"
+                    "Admin"
                 ],
                 "summary": "Traiter une demande de marchand",
                 "parameters": [
@@ -144,6 +142,110 @@ const docTemplate = `{
                         "description": "Erreur serveur",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/merchants": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Récupère tout les marchands (admin only)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Récupérer les marchands",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des marchands",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Merchant"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get all users",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get all users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.User"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -250,8 +352,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/baskets": {
+        "/api/baskets/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Retrieve a list of all baskets",
                 "consumes": [
                     "application/json"
@@ -263,13 +370,22 @@ const docTemplate = `{
                     "Baskets"
                 ],
                 "summary": "Get all baskets",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Basket"
+                                "$ref": "#/definitions/responses.BasketResponse"
                             }
                         }
                     },
@@ -315,7 +431,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Basket"
+                            "$ref": "#/definitions/requests.CreateBasketRequest"
                         }
                     }
                 ],
@@ -349,6 +465,11 @@ const docTemplate = `{
         },
         "/api/baskets/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Retrieve a basket by its ID",
                 "consumes": [
                     "application/json"
@@ -362,6 +483,13 @@ const docTemplate = `{
                 "summary": "Get a single basket",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
                         "type": "integer",
                         "description": "Basket ID",
                         "name": "id",
@@ -373,7 +501,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Basket"
+                            "$ref": "#/definitions/responses.BasketResponse"
                         }
                     },
                     "400": {
@@ -547,7 +675,371 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/merchants/request": {
+        "/api/invitations": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un marchand d'inviter une personne à rejoindre son restaurant en tant que staff",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "summary": "Envoyer une invitation à rejoindre un restaurant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Informations de l'invitation",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "restaurant_id": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Invitation envoyée avec succès",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "string"
+                                },
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur dans la requête",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès non autorisé",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/invitations/accept": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un utilisateur d'accepter une invitation à rejoindre un restaurant en tant que staff",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "summary": "Accepter une invitation à rejoindre un restaurant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Code d'invitation",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invitation acceptée avec succès",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur dans la requête",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/invitations/{invitationId}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un marchand d'annuler une invitation envoyée",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "summary": "Annuler une invitation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID de l'invitation",
+                        "name": "invitationId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invitation annulée avec succès",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur dans la requête",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/merchants": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Récupère les informations du marchand actuel",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchants"
+                ],
+                "summary": "Récupérer information d'un marchand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Informations du marchand",
+                        "schema": {
+                            "$ref": "#/definitions/models.Merchant"
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Marchand non trouvé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un marchand de mettre à jour ses informations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchants"
+                ],
+                "summary": "Update un marchand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Données du marchand",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.UpdateMerchantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -562,7 +1054,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Merchants"
+                    "Users"
                 ],
                 "summary": "Créer une demande de marchand",
                 "parameters": [
@@ -579,7 +1071,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.CreateMerchantRequestInput"
+                            "$ref": "#/definitions/requests.CreateMerchantRequest"
                         }
                     }
                 ],
@@ -612,6 +1104,459 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un marchand de supprimer son compte",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Merchants"
+                ],
+                "summary": "Suppression d'un marchand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/merchants/restaurants": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Données de la demande",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.CreateRestaurantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/merchants/restaurants/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Données de la demande",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.UpdateRestaurantRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Restaurant ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID du restaurant",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{restaurantId}/invitations": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Permet à un marchand de voir toutes les invitations en attente pour son restaurant",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "invitations"
+                ],
+                "summary": "Récupérer les invitations en attente pour un restaurant",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID du restaurant",
+                        "name": "restaurantId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des invitations en attente",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Invitation"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erreur dans la requête",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Accès non autorisé",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -699,6 +1644,17 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -707,6 +1663,68 @@ const docTemplate = `{
                     "example": "Message d'erreur"
                 }
             }
+        },
+        "models.Invitation": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "restaurant": {
+                    "$ref": "#/definitions/models.Restaurant"
+                },
+                "restaurantID": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "sender": {
+                    "$ref": "#/definitions/models.User"
+                },
+                "senderID": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.InvitationStatus"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.InvitationStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "ACCEPTED",
+                "REJECTED",
+                "EXPIRED"
+            ],
+            "x-enum-varnames": [
+                "InvitationPending",
+                "InvitationAccepted",
+                "InvitationRejected",
+                "InvitationExpired"
+            ]
         },
         "models.Merchant": {
             "type": "object",
@@ -820,6 +1838,18 @@ const docTemplate = `{
                     "description": "Adresse complète",
                     "type": "string"
                 },
+                "category": {
+                    "description": "Relation avec Category (clé étrangère)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Category"
+                        }
+                    ]
+                },
+                "category_id": {
+                    "description": "ID de la catégorie (clé étrangère)",
+                    "type": "integer"
+                },
                 "city": {
                     "description": "Ville",
                     "type": "string"
@@ -856,6 +1886,10 @@ const docTemplate = `{
                 "postal_code": {
                     "description": "Code postal (limité à 10 caractères pour compatibilité internationale)",
                     "type": "string"
+                },
+                "rating": {
+                    "description": "Note moyenne (sur 5)",
+                    "type": "number"
                 },
                 "siren": {
                     "description": "SIREN (exactement 9 chiffres, unique)",
@@ -909,7 +1943,52 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.CreateMerchantRequestInput": {
+        "requests.CreateBasketRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "original_price",
+                "price",
+                "quantity",
+                "restaurant_id",
+                "type"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Ceci est un panier suprise"
+                },
+                "expiration_date": {
+                    "type": "string",
+                    "example": "2022-12-31"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "panier surprise"
+                },
+                "original_price": {
+                    "type": "number",
+                    "example": 22
+                },
+                "price": {
+                    "type": "number",
+                    "example": 8.99
+                },
+                "quantity": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "restaurant_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "type": {
+                    "type": "string",
+                    "example": "surprise"
+                }
+            }
+        },
+        "requests.CreateMerchantRequest": {
             "type": "object",
             "required": [
                 "business_name",
@@ -932,6 +2011,41 @@ const docTemplate = `{
                 "siret": {
                     "type": "string",
                     "example": "78467169500087"
+                }
+            }
+        },
+        "requests.CreateRestaurantRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Adresse complète",
+                    "type": "string",
+                    "example": "route de baduel 11"
+                },
+                "city": {
+                    "description": "Ville",
+                    "type": "string",
+                    "example": "cayenne"
+                },
+                "name": {
+                    "description": "Nom du restaurant (obligatoire)",
+                    "type": "string",
+                    "example": "petit bateau 1"
+                },
+                "phone_number": {
+                    "description": "Numéro de téléphone (optionnel, max 15 caractères)",
+                    "type": "string",
+                    "example": "+32470542125"
+                },
+                "postal_code": {
+                    "description": "Code postal (limité à 10 caractères pour compatibilité internationale)",
+                    "type": "string",
+                    "example": "97300"
+                },
+                "siren": {
+                    "description": "SIREN (exactement 9 chiffres, unique)",
+                    "type": "string",
+                    "example": "123456789"
                 }
             }
         },
@@ -977,6 +2091,99 @@ const docTemplate = `{
                 "phone": {
                     "type": "string",
                     "example": "+32460232425"
+                }
+            }
+        },
+        "requests.UpdateMerchantRequest": {
+            "type": "object",
+            "required": [
+                "business_name",
+                "email_pro",
+                "siret"
+            ],
+            "properties": {
+                "business_name": {
+                    "description": "Nom de l'entreprise",
+                    "type": "string",
+                    "example": "petit bateau update"
+                },
+                "email_pro": {
+                    "description": "Email valide requis",
+                    "type": "string",
+                    "example": "merchantupdate@example.com"
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+32452101010"
+                },
+                "siret": {
+                    "description": "Numéro SIRET",
+                    "type": "string",
+                    "example": "78467169500089"
+                }
+            }
+        },
+        "requests.UpdateRestaurantRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "description": "Adresse complète",
+                    "type": "string",
+                    "example": "route de baduel 12"
+                },
+                "city": {
+                    "description": "Ville",
+                    "type": "string",
+                    "example": "remire"
+                },
+                "name": {
+                    "description": "Nom du restaurant (obligatoire)",
+                    "type": "string",
+                    "example": "petit bateau 2"
+                },
+                "phone_number": {
+                    "description": "Numéro de téléphone (optionnel, max 15 caractères)",
+                    "type": "string",
+                    "example": "+32470542125"
+                },
+                "postal_code": {
+                    "description": "Code postal (limité à 10 caractères pour compatibilité internationale)",
+                    "type": "string",
+                    "example": "97301"
+                },
+                "siren": {
+                    "description": "SIREN (exactement 9 chiffres, unique)",
+                    "type": "string",
+                    "example": "123456780"
+                }
+            }
+        },
+        "responses.BasketResponse": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "discountPrice": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "originalPrice": {
+                    "type": "number"
+                },
+                "rating": {
+                    "type": "number"
+                },
+                "typeBasket": {
+                    "type": "string"
                 }
             }
         }

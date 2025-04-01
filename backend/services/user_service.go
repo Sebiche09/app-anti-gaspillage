@@ -57,12 +57,19 @@ func (s *UserService) Login(email string, password string) (string, error) {
 	if err != nil {
 		return "", errors.New("failed to check merchant status")
 	}
-
+	staffRestaurantIDs, err := s.UserRepo.GetStaffRestaurantIDs(user.ID)
+	if err != nil {
+		return "", errors.New("failed to get staff restaurant IDs")
+	}
 	// Générer un token pour l'utilisateur
-	token, err := utils.GenerateToken(user.Email, user.ID, user.IsAdmin, isMerchant)
+	token, err := utils.GenerateToken(user.Email, user.ID, user.IsAdmin, isMerchant, staffRestaurantIDs)
 	if err != nil {
 		return "", errors.New("failed to generate token")
 	}
 
 	return token, nil
+}
+
+func (s *UserService) GetUsers() ([]models.User, error) {
+	return s.UserRepo.GetUsers()
 }

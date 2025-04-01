@@ -59,7 +59,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Appeler le service UserService.Login
 	token, err := h.UserService.Login(req.Email, req.Password)
 	if err != nil {
 		if err.Error() == "invalid credentials" {
@@ -71,4 +70,25 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// getUsers godoc
+// @Summary Get all users
+// @Description Get all users
+// @Tags Admin
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {array} models.User
+// @Failure 500 {object} map[string]string
+// @Router /api/admin/users [get]
+func (h *UserHandler) GetUsers(c *gin.Context) {
+	users, err := h.UserService.GetUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }

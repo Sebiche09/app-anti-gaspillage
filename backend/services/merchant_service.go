@@ -16,8 +16,8 @@ func NewMerchantService(repo *repositories.MerchantRepository) *MerchantService 
 	return &MerchantService{repo: repo}
 }
 
-func (s *MerchantService) CreateMerchantRequest(req requests.CreateMerchantRequestInput, userID uint) error {
-	// Vérifier si une demande est déjà en cours
+// Créer une demande de marchand
+func (s *MerchantService) CreateMerchantRequest(req requests.CreateMerchantRequest, userID uint) error {
 	existingRequest, err := s.repo.FindPendingRequestByUserID(userID)
 	if err != nil {
 		return err
@@ -26,7 +26,6 @@ func (s *MerchantService) CreateMerchantRequest(req requests.CreateMerchantReque
 		return errors.New("une demande est déjà en cours de traitement")
 	}
 
-	// Créer la nouvelle demande
 	request := &models.MerchantRequest{
 		BusinessName: req.BusinessName,
 		EmailPro:     req.EmailPro,
@@ -39,10 +38,12 @@ func (s *MerchantService) CreateMerchantRequest(req requests.CreateMerchantReque
 	return s.repo.CreateMerchantRequest(request)
 }
 
+// Récupérer les demandes en attente
 func (s *MerchantService) GetPendingRequests() ([]models.MerchantRequest, error) {
 	return s.repo.GetPendingRequests()
 }
 
+// Traiter une demande
 func (s *MerchantService) ProcessRequest(requestID uint, status string) error {
 	request, err := s.repo.FindRequestByID(requestID)
 	if err != nil {
@@ -51,7 +52,6 @@ func (s *MerchantService) ProcessRequest(requestID uint, status string) error {
 
 	request.Status = status
 
-	// Si la demande est approuvée, créer le compte marchand
 	if status == "approved" {
 		merchant := &models.Merchant{
 			BusinessName: request.BusinessName,
@@ -67,4 +67,41 @@ func (s *MerchantService) ProcessRequest(requestID uint, status string) error {
 	}
 
 	return s.repo.UpdateRequest(request)
+}
+
+// Récupérer les informations du marchand
+func (s *MerchantService) GetMerchants() ([]models.Merchant, error) {
+	return s.repo.GetMerchants()
+}
+
+// Mettre à jour les informations du marchand
+func (s *MerchantService) UpdateMerchant(req requests.UpdateMerchantRequest, userID uint) error {
+	merchant, err := s.repo.FindMerchantByUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	merchant.BusinessName = req.BusinessName
+	merchant.EmailPro = req.EmailPro
+	merchant.SIRET = req.SIRET
+	merchant.PhoneNumber = req.PhoneNumber
+
+	return s.repo.UpdateMerchant(merchant)
+}
+
+func (s *MerchantService) DeleteMerchant(userID uint) error {
+	merchant, err := s.repo.FindMerchantByUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	if merchant == nil {
+		return errors.New("le marchand n'existe pas")
+	}
+
+	return s.repo.DeleteMerchant(merchant)
+}
+
+func (s *MerchantService) GetMerchant(userID uint) (*models.Merchant, error) {
+	return s.repo.FindMerchantByUserID(userID)
 }

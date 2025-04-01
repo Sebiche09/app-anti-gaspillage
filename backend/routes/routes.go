@@ -14,13 +14,10 @@ type Handler struct {
 }
 
 func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
-	// Documentation Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Routes API
 	api := r.Group("/api")
 
-	// Routes publiques
 	{
 		auth := api.Group("/auth")
 		{
@@ -29,44 +26,65 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 		}
 	}
 
-	// Routes authentifiées
 	authenticated := api.Group("")
 	authenticated.Use(middlewares.Authenticate)
 	{
-		// Routes paniers
-		baskets := authenticated.Group("/baskets")
+		restaurants := authenticated.Group("/restaurants")
 		{
-			// Routes accessibles à tous les utilisateurs authentifiés
-			baskets.GET("", h.Basket.GetBaskets)
-			baskets.GET("/:id", h.Basket.GetBasket)
+			restaurants.GET("/", h.Restaurant.GetRestaurants)
+			restaurants.GET("/:id", h.Restaurant.GetRestaurant)
 
-			// Routes réservées aux marchands
-			merchantBaskets := baskets.Group("")
-			merchantBaskets.Use(middlewares.RequireMerchantWithSync(db))
-			{
-				merchantBaskets.POST("", h.Basket.CreateBasket)
-				merchantBaskets.PUT("/:id", h.Basket.UpdateBasket)
-				merchantBaskets.DELETE("/:id", h.Basket.DeleteBasket)
-			}
+			// Route pour obtenir les invitations en attente d'un restaurant
+			restaurants.GET("/:id/invitations", h.Invitation.GetPendingInvitations)
 		}
 
-		// Routes marchands
 		merchants := authenticated.Group("/merchants")
 		{
-			merchants.POST("/request", h.Merchant.CreateMerchantRequest)
+			merchants.POST("/", h.Merchant.CreateMerchantRequest)
+			merchants.GET("/restaurants", h.Restaurant.GetRestaurantsMerchant)
+			merchants.PUT("/restaurants/:id", h.Restaurant.UpdateRestaurant)
+			merchants.POST("/restaurants", h.Restaurant.CreateRestaurant)
 		}
 
-		// Routes administrateur
+		merchants.Use(middlewares.RequireMerchantWithSync(db))
+		{
+			merchants.PUT("/", h.Merchant.UpdateMerchant)
+			merchants.DELETE("/", h.Merchant.DeleteMerchant)
+			merchants.GET("/", h.Merchant.GetMerchant)
+		}
+
 		admin := authenticated.Group("/admin")
 		admin.Use(middlewares.RequireAdmin())
 		{
-			// Gestion des demandes marchands
+			admin.GET("/merchants", h.Merchant.GetMerchants)
 			admin.GET("/merchant-requests", h.Merchant.GetPendingRequests)
 			admin.PUT("/merchant-requests/:id", h.Merchant.ProcessRequest)
+			admin.GET("/users", h.User.GetUsers)
+		}
 
-			// Espace pour futures routes admin
-			// admin.GET("/users", h.Admin.GetUsers)
-			// admin.GET("/statistics", h.Admin.GetStatistics)
+		// Routes pour les invitations
+		invitations := authenticated.Group("/invitations")
+		{
+			invitations.POST("/", h.Invitation.CreateInvitation)
+			invitations.GET("/accept", h.Invitation.AcceptInvitation)
+			invitations.DELETE("/:id", h.Invitation.CancelInvitation)
+		}
+
+		// Routes pour les paniers (baskets)
+		baskets := authenticated.Group("/baskets")
+		{
+			// Routes publiques pour les paniers
+			baskets.GET("/", h.Basket.GetBaskets)
+			baskets.GET("/:id", h.Basket.GetBasket)
+
+			// Routes pour la gestion des paniers (staff du restaurant uniquement)
+			staffBaskets := baskets.Group("")
+			staffBaskets.Use(middlewares.RequireRestaurantStaff())
+			{
+				staffBaskets.POST("/", h.Basket.CreateBasket)
+				staffBaskets.PUT("/:id", h.Basket.UpdateBasket)
+				staffBaskets.DELETE("/:id", h.Basket.DeleteBasket)
+			}
 		}
 	}
 }

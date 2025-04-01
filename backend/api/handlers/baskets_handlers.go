@@ -1,9 +1,12 @@
+// @Security Bearer
 package handlers
 
 import (
 	"net/http"
 	"strconv"
 
+	"github.com/Sebiche09/app-anti-gaspillage.git/api/requests"
+	"github.com/Sebiche09/app-anti-gaspillage.git/api/responses"
 	"github.com/Sebiche09/app-anti-gaspillage.git/models"
 	"github.com/Sebiche09/app-anti-gaspillage.git/services"
 	"github.com/gin-gonic/gin"
@@ -23,16 +26,35 @@ func NewBasketHandler(basketService *services.BasketService) *BasketHandler {
 // @Tags Baskets
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} models.Basket
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {array} responses.BasketResponse
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/baskets [get]
+// @Router /api/baskets/ [get]
 func (h *BasketHandler) GetBaskets(c *gin.Context) {
 	baskets, err := h.BasketService.GetBaskets()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, baskets)
+
+	var response []responses.BasketResponse
+
+	for _, basket := range baskets {
+		basketResponse := responses.BasketResponse{
+			ID:            strconv.Itoa(int(basket.ID)),
+			Name:          basket.Name,
+			Address:       basket.Restaurant.Address,
+			Rating:        basket.Restaurant.Rating,
+			OriginalPrice: basket.OriginalPrice,
+			DiscountPrice: basket.Price,
+			TypeBasket:    basket.TypeBasket,
+			Category:      basket.Restaurant.Category.Name,
+		}
+		response = append(response, basketResponse)
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // GetBasket godoc
@@ -41,8 +63,10 @@ func (h *BasketHandler) GetBaskets(c *gin.Context) {
 // @Tags Baskets
 // @Accept  json
 // @Produce  json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
 // @Param id path int true "Basket ID"
-// @Success 200 {object} models.Basket
+// @Success 200 {object} responses.BasketResponse
 // @Failure 400 {object} map[string]string "Invalid basket ID"
 // @Failure 404 {object} map[string]string "Basket not found"
 // @Router /api/baskets/{id} [get]
@@ -59,7 +83,18 @@ func (h *BasketHandler) GetBasket(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, basket)
+	response := responses.BasketResponse{
+		ID:            strconv.Itoa(int(basket.ID)),
+		Name:          basket.Name,
+		Address:       basket.Restaurant.Address,
+		Rating:        basket.Restaurant.Rating,
+		OriginalPrice: basket.OriginalPrice,
+		DiscountPrice: basket.Price,
+		TypeBasket:    basket.TypeBasket,
+		Category:      basket.Restaurant.Category.Name,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // CreateBasket godoc
@@ -70,25 +105,27 @@ func (h *BasketHandler) GetBasket(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param Authorization header string true "Bearer token"
-// @Param basket body models.Basket true "Basket data"
+// @Param basket body requests.CreateBasketRequest true "Basket data"
 // @Success 201 {object} models.Basket
 // @Failure 400 {object} map[string]string "Bad request, invalid input"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/baskets [post]
+// @Router /api/baskets/ [post]
 func (h *BasketHandler) CreateBasket(c *gin.Context) {
-	var basket models.Basket
-	if err := c.ShouldBindJSON(&basket); err != nil {
+	var basketRequest requests.CreateBasketRequest
+	if err := c.ShouldBindJSON(&basketRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userId := c.GetInt("userId") // Récupère l'ID de l'utilisateur connecté
-	if err := h.BasketService.CreateBasket(basket, userId); err != nil {
+	userId := uint(c.GetInt("userId"))
+
+	err := h.BasketService.CreateBasket(basketRequest, userId)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, basket)
+	c.JSON(http.StatusCreated, err)
 }
 
 // UpdateBasket godoc
