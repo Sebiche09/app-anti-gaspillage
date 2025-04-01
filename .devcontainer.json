@@ -1,8 +1,9 @@
 {
     "name": "app-anti-gaspillage",
-    "dockerComposeFile": "docker-compose.yml",
-    "service": "backend", // Service principal pour le développement
-    "workspaceFolder": "/workspace",
+    "image": "mcr.microsoft.com/devcontainers/go",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
     "customizations": {
         "vscode": {
             "extensions": [
