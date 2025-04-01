@@ -4,13 +4,26 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: backend
+    volumes:
+      - ..:/workspace:cached 
     ports:
       - "8080:8080"
     depends_on:
       - db
     environment:
       - DATABASE_URL=postgres://user:password@db:5432/anti_gaspillage?sslmode=disable
-
+  
+  flutter:
+    image: matspfeiffer/flutter
+    container_name: flutter
+    volumes:
+      - ..:/workspace:cached 
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    environment:
+      - DISPLAY=${DISPLAY}
+    devices:
+      - /dev/kvm:/dev/kvm
+      - /dev/dri:/dev/dri
   db:
     build:
       context: ./db
