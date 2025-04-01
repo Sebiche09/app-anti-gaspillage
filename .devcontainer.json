@@ -1,20 +1,21 @@
 {
     "name": "app-anti-gaspillage",
-    "image": "mcr.microsoft.com/devcontainers/go",
-    "features": {
-      "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-    },
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "backend", // Service principal pour le développement
+    "workspaceFolder": "/workspace",
     "customizations": {
-      "vscode": {
-        "extensions": [
-            "github.copilot",
-            "golang.go",
-            "ms-ossdata.vscode-postgresql",
-            "eamodio.gitlens",
-            "esbenp.prettier-vscode",
-            "cweijan.dbclient-jdbc",
-            "cweijan.vscode-database-client2"
-        ]
-      }
+        "vscode": {
+            "extensions": [
+                "github.copilot",
+                "golang.go",
+                "ms-ossdata.vscode-postgresql",
+                "eamodio.gitlens",
+                "esbenp.prettier-vscode",
+                "cweijan.dbclient-jdbc",
+                "cweijan.vscode-database-client2",
+                "dart-code.dart-code",
+                "dart-code.flutter"
+            ]
+        }
     }
 }
