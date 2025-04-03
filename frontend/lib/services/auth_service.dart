@@ -301,7 +301,6 @@ class AuthService {
       _storage.delete(key: _userKey),
     ]);
     
-    // Optionnel: appeler une API de déconnexion côté serveur
     try {
       final token = await _storage.read(key: _tokenKey);
       if (token != null) {
@@ -315,7 +314,7 @@ class AuthService {
         ).timeout(const Duration(seconds: 5));
       }
     } catch (e) {
-      // Ignorer les erreurs de déconnexion côté serveur
+
       debugPrint('Erreur lors de la déconnexion côté serveur: $e');
     }
   }

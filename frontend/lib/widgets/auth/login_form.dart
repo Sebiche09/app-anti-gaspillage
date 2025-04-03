@@ -12,9 +12,9 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final _formKey = GlobalKey<FormState>(); //permet de valider le formulaire
-  final _emailController = TextEditingController(); //permet de récupérer l'email
-  final _passwordController = TextEditingController(); //permet de récupérer le mot de passe
+  final _formKey = GlobalKey<FormState>(); 
+  final _emailController = TextEditingController(); 
+  final _passwordController = TextEditingController(); 
   bool _obscurePassword = true; //permet de cacher le mot de passe
 
   @override
@@ -26,18 +26,22 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _login() async {
-    if (_formKey.currentState!.validate()) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+  FocusScope.of(context).unfocus();
+  
+  if (_formKey.currentState!.validate()) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.login(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
 
-      if (success && mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
-      }
+    if (!mounted) return;
+    
+    if (success) {
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

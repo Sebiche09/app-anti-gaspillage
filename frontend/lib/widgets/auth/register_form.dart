@@ -12,12 +12,12 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  final _formKey = GlobalKey<FormState>(); // Permet de valider le formulaire
+  final _formKey = GlobalKey<FormState>(); 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _fullnameController = TextEditingController();
   final _phoneController = TextEditingController();
-  bool _obscurePassword = true; // Permet de cacher le mot de passe
+  bool _obscurePassword = true; 
 
   @override
   void dispose() {
@@ -105,7 +105,6 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 16),
 
-            // Champ numéro de téléphone
             // Champ numéro de téléphone
             TextFormField(
               controller: _phoneController,

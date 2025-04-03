@@ -18,23 +18,31 @@ class AuthProvider with ChangeNotifier {
   AuthStatus get status => _status;
   
   Future<bool> login(String email, String password) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = '';
-    notifyListeners();
+  _status = AuthStatus.authenticating;
+  _errorMessage = '';
+  notifyListeners();
 
-    try {
-      final loginResponse = await _authService.login(email, password);
+  try {
+    final loginResponse = await _authService.login(email, password);
+    
+    if (loginResponse.success) {
       _user = loginResponse.user;
       _status = AuthStatus.authenticated;
       notifyListeners();
       return true;
-    } catch (e) {
+    } else {
       _status = AuthStatus.error;
-      _errorMessage = e.toString();
+      _errorMessage = loginResponse.errorMessage ?? 'Identifiants incorrects';
       notifyListeners();
       return false;
     }
+  } catch (e) {
+    _status = AuthStatus.error;
+    _errorMessage = e.toString();
+    notifyListeners();
+    return false;
   }
+}
 
   Future<bool> register(String fullname, String email, String phone, String password) async {
     _status = AuthStatus.authenticating;
