@@ -44,13 +44,13 @@ class AuthProvider with ChangeNotifier {
   }
 }
 
-  Future<bool> register(String fullname, String email, String phone, String password) async {
+  Future<bool> register(String email, String password) async {
     _status = AuthStatus.authenticating;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      final registerResponse = await _authService.register(fullname, email, phone, password);
+      final registerResponse = await _authService.register(email, password);
       _user = registerResponse.user;
       _status = AuthStatus.authenticated;
       notifyListeners();

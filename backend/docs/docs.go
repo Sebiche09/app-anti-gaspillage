@@ -1904,9 +1904,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
-                "full_name",
-                "password_hash",
-                "phone"
+                "password_hash"
             ],
             "properties": {
                 "createdAt": {
@@ -1919,10 +1917,6 @@ const docTemplate = `{
                     "description": "Validation d'email",
                     "type": "string"
                 },
-                "full_name": {
-                    "description": "Nom complet requis",
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -1932,10 +1926,6 @@ const docTemplate = `{
                 },
                 "password_hash": {
                     "description": "Hash du mot de passe",
-                    "type": "string"
-                },
-                "phone": {
-                    "description": "Téléphone requis",
                     "type": "string"
                 },
                 "updatedAt": {
@@ -2070,27 +2060,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
-                "full_name",
-                "password",
-                "phone"
+                "password"
             ],
             "properties": {
                 "email": {
                     "type": "string",
                     "example": "user@example.com"
                 },
-                "full_name": {
-                    "type": "string",
-                    "example": "patrick"
-                },
                 "password": {
                     "type": "string",
                     "minLength": 8,
                     "example": "password123"
-                },
-                "phone": {
-                    "type": "string",
-                    "example": "+32460232425"
                 }
             }
         },

@@ -24,7 +24,7 @@ class RegisterScreen extends StatelessWidget {
                   'assets/logo.png',
                   height: 120,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
                 Text(
                   AppText.registerTitle,
                   style: AppStyles.titleStyle,

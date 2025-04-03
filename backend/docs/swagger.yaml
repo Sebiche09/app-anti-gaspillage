@@ -237,9 +237,6 @@ definitions:
       email:
         description: Validation d'email
         type: string
-      full_name:
-        description: Nom complet requis
-        type: string
       id:
         type: integer
       is_admin:
@@ -248,16 +245,11 @@ definitions:
       password_hash:
         description: Hash du mot de passe
         type: string
-      phone:
-        description: Téléphone requis
-        type: string
       updatedAt:
         type: string
     required:
     - email
-    - full_name
     - password_hash
-    - phone
     type: object
   requests.CreateBasketRequest:
     properties:
@@ -356,21 +348,13 @@ definitions:
       email:
         example: user@example.com
         type: string
-      full_name:
-        example: patrick
-        type: string
       password:
         example: password123
         minLength: 8
         type: string
-      phone:
-        example: "+32460232425"
-        type: string
     required:
     - email
-    - full_name
     - password
-    - phone
     type: object
   requests.UpdateMerchantRequest:
     properties:

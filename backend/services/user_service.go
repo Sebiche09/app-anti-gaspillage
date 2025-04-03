@@ -32,8 +32,6 @@ func (s *UserService) Create(req requests.RegisterRequest) error {
 	user := &models.User{
 		Email:        req.Email,
 		PasswordHash: hashedPassword,
-		FullName:     req.FullName,
-		Phone:        req.Phone,
 	}
 
 	// Sauvegarder l'utilisateur dans la base de données

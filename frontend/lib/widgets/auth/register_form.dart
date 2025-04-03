@@ -15,16 +15,12 @@ class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>(); 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _fullnameController = TextEditingController();
-  final _phoneController = TextEditingController();
   bool _obscurePassword = true; 
 
   @override
   void dispose() {
     // Libération des ressources
-    _fullnameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -33,9 +29,7 @@ class _RegisterFormState extends State<RegisterForm> {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final success = await authProvider.register(
-        _fullnameController.text.trim(),
         _emailController.text.trim(),
-        _phoneController.text.trim(),
         _passwordController.text,
       );
 
@@ -50,34 +44,10 @@ class _RegisterFormState extends State<RegisterForm> {
     final authProvider = Provider.of<AuthProvider>(context);
     final isLoading = authProvider.status == AuthStatus.authenticating;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: Form(
+      return Form(
         key: _formKey,
         child: Column(
           children: [
-            // Champ nom complet
-            TextFormField(
-              controller: _fullnameController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF5F5F5),
-                hintText: 'Nom complet',
-                prefixIcon: const Icon(Icons.person),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Veuillez entrer votre nom complet';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-
             // Champ email
             TextFormField(
               controller: _emailController,
@@ -104,35 +74,6 @@ class _RegisterFormState extends State<RegisterForm> {
               },
             ),
             const SizedBox(height: 16),
-
-            // Champ numéro de téléphone
-            TextFormField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF5F5F5),
-                hintText: 'Numéro de téléphone (+32470542056)',
-                prefixIcon: const Icon(Icons.phone),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Veuillez entrer votre numéro de téléphone';
-                }
-                // Validation E.164 : commence par (+), suivi de 10 à 15 chiffres
-                if (!RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(value.trim())) {
-                  return 'Veuillez entrer un numéro de téléphone au format E.164 (+32470542056 par exemple)';
-                }
-                return null;
-              },
-            ),
-
-            const SizedBox(height: 16),
-
             // Champ mot de passe
             TextFormField(
               controller: _passwordController,
@@ -193,7 +134,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 80),
 
             // Message d'erreur
             if (authProvider.status == AuthStatus.error &&
@@ -208,7 +149,6 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
