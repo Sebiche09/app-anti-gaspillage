@@ -4,7 +4,7 @@ import '../../constants/app_styles.dart';
 import '../../constants/app_text.dart';
 import '../../widgets/auth/register_form.dart';
 import '../../widgets/auth/login_link.dart';
-import 'register_screen.dart';
+import 'login_screen.dart'; 
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -14,30 +14,31 @@ class RegisterScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Image.asset(
-                'assets/logo.png',
-                height: 120,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppText.registerTitle,
-                style: AppStyles.titleStyle,
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                AppText.registerSubtitle,
-                style: AppStyles.subtitleStyle,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-
-              const RegisterForm(),
-            ],
+        child: Center( 
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,  
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  height: 120,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  AppText.registerTitle,
+                  style: AppStyles.titleStyle,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  AppText.registerSubtitle,
+                  style: AppStyles.subtitleStyle,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                const RegisterForm(),
+              ],
+            ),
           ),
         ),
       ),
@@ -45,7 +46,7 @@ class RegisterScreen extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context, 
-            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()), 
           );
         },
       ),

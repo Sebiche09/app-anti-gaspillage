@@ -239,23 +239,20 @@ class AuthService {
   }
 
   // Enregistre un nouvel utilisateur
-  Future<RegisterResponse> register(String fullname, String email, String phone, String password) async {
+  Future<RegisterResponse> register(String email, String password) async {
   final url = '$baseUrl/api/auth/signup';
-
+  print(email + ""  +password);
   try {
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'full_name': fullname.trim(),
         'email': email.trim(),
-        'phone': phone.trim(),
         'password': password,
       }),
     ).timeout(_requestTimeout);
     print('Response status: ${response.statusCode}');
     if (response.statusCode == 201 || response.statusCode == 200) {
-      // Adapter `_handleSuccessfulLogin` pour un `RegisterResponse`
       final loginResponse = await _handleSuccessfulLogin(response);
       return RegisterResponse(
         success: true,
@@ -301,7 +298,6 @@ class AuthService {
       _storage.delete(key: _userKey),
     ]);
     
-    // Optionnel: appeler une API de déconnexion côté serveur
     try {
       final token = await _storage.read(key: _tokenKey);
       if (token != null) {
@@ -315,7 +311,7 @@ class AuthService {
         ).timeout(const Duration(seconds: 5));
       }
     } catch (e) {
-      // Ignorer les erreurs de déconnexion côté serveur
+
       debugPrint('Erreur lors de la déconnexion côté serveur: $e');
     }
   }
