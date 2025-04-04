@@ -29,6 +29,7 @@ func (s *RestaurantService) CreateRestaurant(req requests.CreateRestaurantReques
 		PostalCode:  req.PostalCode,
 		PhoneNumber: req.PhoneNumber,
 		MerchantID:  merchand.ID,
+		CategoryID:  req.CategoryID,
 	}
 
 	return s.restaurantRepo.CreateRestaurant(restaurant)
