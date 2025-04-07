@@ -1,15 +1,23 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
+import 'dart:ui_web' as ui; 
+
+
 import 'constants/auth_status.dart';
 import 'providers/auth_provider.dart';
+import 'providers/basket_provider.dart'; 
 import 'services/auth_service.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/home/home_screen.dart';
+import 'services/api_service.dart'; 
+import 'services/basket_service.dart';
+import '/ui/screens/auth/login_screen.dart';
+import '/ui/screens/home_screen.dart';
+import '/ui/screens/explore_screen.dart';
 import 'utils/api_config.dart';
+import 'dart:html' as html;
 
 void main() {
+  registerViewFactory(); 
   runApp(
     DevicePreview(
       enabled: true,
@@ -18,17 +26,44 @@ void main() {
   );
 }
 
+void registerViewFactory() {
+  ui.platformViewRegistry.registerViewFactory('mapbox-container', (int viewId) {
+    final html.DivElement mapContainer = html.DivElement()
+      ..id = 'mapbox-container'
+      ..style.width = '100%'
+      ..style.height = '100%';
+    return mapContainer;
+  });
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthProvider>(
-      create: (context) => AuthProvider(
-        AuthService(baseUrl: ApiConfig.baseUrl),
-      ),
+    final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+    final authService = AuthService(baseUrl: ApiConfig.baseUrl);
+    
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(
+          create: (_) => AuthProvider(authService),
+        ),
+        ChangeNotifierProvider<BasketsProvider>(
+          create: (_) => BasketsProvider(
+            BasketService(apiService: apiService),
+          ),
+        ),
+      ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
+          // Chargez les paniers après authentification
+          if (authProvider.status == AuthStatus.authenticated) {
+            Future.microtask(() => 
+              Provider.of<BasketsProvider>(context, listen: false).fetchBaskets()
+            );
+          }
+          
           return MaterialApp(
             useInheritedMediaQuery: true,
             locale: DevicePreview.locale(context),
@@ -40,12 +75,13 @@ class MyApp extends StatelessWidget {
                 seedColor: const Color(0xFF3B4929),
                 primary: const Color(0xFF3B4929),
               ),
-              scaffoldBackgroundColor: const Color(0xFF3B4929),
+              scaffoldBackgroundColor: Colors.white,
               useMaterial3: true,
             ),
             routes: {
               '/login': (context) => const LoginScreen(),
               '/home': (context) => const HomeScreen(),
+              '/explore': (context) => const ExploreScreen(),
             },
             initialRoute: authProvider.status == AuthStatus.authenticated
                 ? '/home'

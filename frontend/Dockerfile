@@ -43,6 +43,11 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     ca-certificates \
+    libglfw3 \
+    libglfw3-dev \
+    pkg-config \
+    libgtk-3-dev \
+    libjsoncpp-dev \
     && apt-get clean
 
 # Créer un utilisateur non-root

@@ -13,4 +13,6 @@ class AppText {
   static const String forgotPassword = 'Mot de passe oublié ?';
   static const String registerPrompt = 'Pas encore de compte ?';
   static const String registerLink = 'Inscrivez-vous!';
+
+
 }

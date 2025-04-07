@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../constants/app_colors.dart';
-import '../../providers/auth_provider.dart';
-import '../../constants/auth_status.dart';
+import '../../../constants/app_colors.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../constants/auth_status.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
