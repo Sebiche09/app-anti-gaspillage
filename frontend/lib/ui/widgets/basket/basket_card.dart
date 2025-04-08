@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/basket.dart';
 import '../../screens/basket_details_screen.dart';
+import '../../../constants/app_colors.dart';
 
 class BasketCard extends StatelessWidget {
   final Basket basket;
@@ -26,8 +27,8 @@ class BasketCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
+          color: AppColors.white,
+          border: Border.all(color: AppColors.border.withOpacity(0.2)),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -47,7 +48,7 @@ class BasketCard extends StatelessWidget {
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         height: 200,
-                        color: Colors.grey.shade300,
+                        color: AppColors.border.withOpacity(0.2),
                         child: const Center(
                           child: Icon(Icons.image_not_supported, size: 50),
                         ),
@@ -60,18 +61,7 @@ class BasketCard extends StatelessWidget {
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFFD700),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.star, size: 16),
-                    ),
-                  ),
+                 
                   Positioned(
                     top: 12,
                     right: 12,
@@ -80,10 +70,7 @@ class BasketCard extends StatelessWidget {
                         horizontal: 12,
                         vertical: 6,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                     
                     ),
                   ),
                 ],
@@ -107,7 +94,7 @@ class BasketCard extends StatelessWidget {
                     basket.address,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade600,
+                      color: AppColors.border.withOpacity(0.6),
                     ),
                   ),
                 ],
@@ -135,7 +122,7 @@ class BasketCard extends StatelessWidget {
                   Text(
                     '\$${basket.originalPrice.toStringAsFixed(1)}',
                     style: const TextStyle(
-                      color: Colors.grey,
+                      color: AppColors.border,
                       decoration: TextDecoration.lineThrough,
                       fontSize: 14,
                     ),
@@ -144,7 +131,7 @@ class BasketCard extends StatelessWidget {
                   Text(
                     '\$${basket.discountPrice.toStringAsFixed(1)}',
                     style: const TextStyle(
-                      color: Color(0xFFFF8D23),
+                      color: AppColors.secondary, //
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),

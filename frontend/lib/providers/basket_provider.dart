@@ -29,7 +29,7 @@ class BasketsProvider with ChangeNotifier {
 
     try {
       _baskets = await _basketService.getBaskets();
-      _applyFilters(); // Appliquer les filtres existants aux nouvelles données
+      _applyFilters(); 
       _isLoading = false;
       notifyListeners();
     } catch (e) {

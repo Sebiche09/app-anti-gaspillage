@@ -5,12 +5,14 @@ class Header extends StatefulWidget {
   final String title;
   final String searchString;
   final Function(String)? onSearch;
+  final bool isCentered;
 
   const Header({
     Key? key,
     required this.title,
     required this.searchString,
     this.onSearch,
+    this.isCentered = false,
   }) : super(key: key);
 
   @override
@@ -40,11 +42,13 @@ class _HeaderState extends State<Header> {
                 backgroundImage: AssetImage('assets/profile.png'),
               ),
               Expanded(
-                child: Center(
+                child: Container(
+                  alignment: widget.isCentered ? Alignment.center : Alignment.centerLeft,
+                  margin: widget.isCentered ? EdgeInsets.zero : const EdgeInsets.only(left: 16),
                   child: Text(
                     widget.title,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
 import 'dart:ui_web' as ui; 
 
-
 import 'constants/auth_status.dart';
 import 'providers/auth_provider.dart';
 import 'providers/basket_provider.dart'; 
@@ -15,16 +14,56 @@ import '/ui/screens/home_screen.dart';
 import '/ui/screens/explore_screen.dart';
 import 'utils/api_config.dart';
 import 'dart:html' as html;
+import 'ui/widgets/home/home_header.dart';
+import 'ui/screens/loading_screen.dart';
+import 'ui/screens/main_screen.dart';
 
-void main() {
-  registerViewFactory(); 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  registerViewFactory();
+
   runApp(
     DevicePreview(
       enabled: true,
-      builder: (context) => const MyApp(),
+      builder: (context) => const LoadingApp(),
     ),
   );
 }
+
+class LoadingApp extends StatefulWidget {
+  const LoadingApp({super.key});
+
+  @override
+  _LoadingAppState createState() => _LoadingAppState();
+}
+
+class _LoadingAppState extends State<LoadingApp> {
+  bool isLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadResources();
+  }
+
+  Future<void> _loadResources() async {
+    await HomeHeader.loadLocation();
+    setState(() {
+      isLoaded = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isLoaded) {
+      return const MaterialApp(
+        home: LoadingScreen(),
+      );
+    }
+    return const MyApp();
+  }
+}
+
 
 void registerViewFactory() {
   ui.platformViewRegistry.registerViewFactory('mapbox-container', (int viewId) {
@@ -80,7 +119,7 @@ class MyApp extends StatelessWidget {
             ),
             routes: {
               '/login': (context) => const LoginScreen(),
-              '/home': (context) => const HomeScreen(),
+              '/home': (context) => const MainScreen(),
               '/explore': (context) => const ExploreScreen(),
             },
             initialRoute: authProvider.status == AuthStatus.authenticated

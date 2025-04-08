@@ -6,28 +6,29 @@ import '../common/empty_state_view.dart';
 import '../common/category_selector.dart';
 import '../common/error_view.dart';
 import '../basket/basket_card.dart';
+import '../../../constants/app_colors.dart';
 
 class ContentSection extends StatelessWidget {
   final String activeCategory;
   final Function(String) onCategorySelected;
-  final BasketListConfig config;
+  final List<String> categories;
 
   const ContentSection({
     Key? key,
     required this.activeCategory,
     required this.onCategorySelected,
-    this.config = const BasketListConfig(),
+    this.categories = const ['Tout', 'Boulangerie', 'Epicerie', 'végétarien', 'Sushi', 'Favoris']
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: AppColors.background,
       child: Column(
         children: [
           CategorySelector(
             initialCategory: activeCategory,
-            categories: config.categories,
+            categories: categories,
             onCategorySelected: onCategorySelected,
           ),
           Expanded(
@@ -60,23 +61,12 @@ class ContentSection extends StatelessWidget {
 
         return BasketListView(
           baskets: filteredBaskets,
-          padding: config.padding,
         );
       },
     );
   }
 }
 
-// Classe de configuration pour personnaliser la liste des paniers
-class BasketListConfig {
-  final List<String> categories;
-  final EdgeInsets padding;
-
-  const BasketListConfig({
-    this.categories = const ['Tout', 'Boulangerie', 'Epicerie', 'végétarien', 'Sushi', 'Favoris'],
-    this.padding = const EdgeInsets.all(16),
-  });
-}
 class BasketListView extends StatelessWidget {
   final List<Basket> baskets;
   final EdgeInsets padding;
@@ -84,7 +74,7 @@ class BasketListView extends StatelessWidget {
   const BasketListView({
     Key? key, 
     required this.baskets, 
-    this.padding = const EdgeInsets.all(16),
+    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
   }) : super(key: key);
 
   @override

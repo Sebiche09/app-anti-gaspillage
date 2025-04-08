@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/basket_provider.dart';
 import '../widgets/home/content_section.dart';
-import '../widgets/home/home_bottom_navigation.dart';
 import '../widgets/home/home_header.dart';
 import '../../constants/app_colors.dart';
 
-
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+  
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -29,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: AppColors.background,
+        color: AppColors.primary,
         child: SafeArea(
           child: Column(
             children: [
@@ -46,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: const HomeBottomNavigation(),
     );
   }
 }
