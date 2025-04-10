@@ -40,15 +40,15 @@ func (h *MerchantHandler) CreateMerchantRequest(c *gin.Context) {
 		return
 	}
 
-	req.SIRET = strings.ReplaceAll(req.SIRET, " ", "")
-	req.SIRET = strings.ReplaceAll(req.SIRET, "-", "")
+	req.SIREN = strings.ReplaceAll(req.SIREN, " ", "")
+	req.SIREN = strings.ReplaceAll(req.SIREN, "-", "")
 
-	if len(req.SIRET) != 14 {
+	if len(req.SIREN) != 9 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Le SIRET doit contenir exactement 14 chiffres"})
 		return
 	}
 
-	if _, err := strconv.ParseUint(req.SIRET, 10, 64); err != nil {
+	if _, err := strconv.ParseUint(req.SIREN, 10, 64); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Le SIRET doit contenir uniquement des chiffres"})
 		return
 	}

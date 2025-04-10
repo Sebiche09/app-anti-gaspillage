@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"os"
+
+	"github.com/Sebiche09/app-anti-gaspillage.git/geocoding"
 	"github.com/Sebiche09/app-anti-gaspillage.git/repositories"
 	"github.com/Sebiche09/app-anti-gaspillage.git/services"
 	"gorm.io/gorm"
@@ -28,8 +31,13 @@ func NewHandlers(db *gorm.DB) *Handlers {
 	merchantService := services.NewMerchantService(merchantRepo)
 	merchantHandler := NewMerchantHandler(merchantService)
 
+	geocodingConfig := geocoding.Config{
+		APIKey: getEnv("GEOAPIFY_API_KEY", "2115077bfd0b48daa4204a0e9466c4cc"),
+	}
+	geocodingService := geocoding.NewService(geocodingConfig)
+
 	restaurantRepo := repositories.NewRestaurantRepository(db)
-	restaurantService := services.NewRestaurantService(restaurantRepo, merchantRepo)
+	restaurantService := services.NewRestaurantService(restaurantRepo, merchantRepo, geocodingService)
 	restaurantHandler := NewRestaurantHandler(restaurantService)
 
 	// Initialisation des nouveaux repositories et services pour les invitations
@@ -58,4 +66,12 @@ func NewHandlers(db *gorm.DB) *Handlers {
 		Restaurant: restaurantHandler,
 		Invitation: invitationHandler,
 	}
+}
+
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }

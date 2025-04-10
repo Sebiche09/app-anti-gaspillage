@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_styles.dart';
-import '../../constants/app_text.dart';
-import '../../widgets/auth/register_form.dart';
-import '../../widgets/auth/login_link.dart';
-import 'login_screen.dart'; 
+import '../../../constants/app_colors.dart';
+import '../../../constants/app_styles.dart';
+import '../../../constants/app_text.dart';
+import '../../widgets/auth/login_form.dart';
+import '../../widgets/auth/register_link.dart';
+import 'register_screen.dart';
 
-class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class RegisterScreen extends StatelessWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
-              mainAxisSize: MainAxisSize.min,  
+              mainAxisSize: MainAxisSize.min, 
               children: [
                 Image.asset(
                   'assets/logo.png',
@@ -26,27 +26,27 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  AppText.registerTitle,
+                  AppText.loginTitle,
                   style: AppStyles.titleStyle,
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  AppText.registerSubtitle,
+                  AppText.loginSubtitle,
                   style: AppStyles.subtitleStyle,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                const RegisterForm(),
+                const LoginForm(),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: LoginLink(
+      bottomNavigationBar: RegisterLink(
         onPressed: () {
           Navigator.push(
             context, 
-            MaterialPageRoute(builder: (context) => const LoginScreen()), 
+            MaterialPageRoute(builder: (context) => const RegisterScreen()),
           );
         },
       ),

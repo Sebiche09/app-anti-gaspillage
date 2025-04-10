@@ -310,6 +310,10 @@ definitions:
         description: Adresse complète
         example: route de baduel 11
         type: string
+      category_id:
+        description: ID de la catégorie (obligatoire)
+        example: 1
+        type: integer
       city:
         description: Ville
         example: cayenne
@@ -384,6 +388,10 @@ definitions:
         description: Adresse complète
         example: route de baduel 12
         type: string
+      category_id:
+        description: ID de la catégorie (obligatoire)
+        example: 1
+        type: integer
       city:
         description: Ville
         example: remire

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../constants/app_colors.dart';
-import '../../providers/auth_provider.dart';
-import '../../constants/auth_status.dart';
+import '../../../constants/app_colors.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../constants/auth_status.dart';
+import '../../../ui/screens/main_screen.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -34,11 +35,14 @@ class _LoginFormState extends State<LoginForm> {
       _emailController.text.trim(),
       _passwordController.text,
     );
-
+    print('Login success: $success'); // Debugging
     if (!mounted) return;
     
     if (success) {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScreen()),
+      );
     }
   }
 }

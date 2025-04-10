@@ -29,7 +29,7 @@ func (s *MerchantService) CreateMerchantRequest(req requests.CreateMerchantReque
 	request := &models.MerchantRequest{
 		BusinessName: req.BusinessName,
 		EmailPro:     req.EmailPro,
-		SIRET:        req.SIRET,
+		SIREN:        req.SIREN,
 		PhoneNumber:  req.PhoneNumber,
 		UserID:       userID,
 		Status:       "pending",
@@ -56,7 +56,7 @@ func (s *MerchantService) ProcessRequest(requestID uint, status string) error {
 		merchant := &models.Merchant{
 			BusinessName: request.BusinessName,
 			EmailPro:     request.EmailPro,
-			SIRET:        request.SIRET,
+			SIREN:        request.SIREN,
 			PhoneNumber:  request.PhoneNumber,
 			UserID:       request.UserID,
 		}
@@ -83,7 +83,7 @@ func (s *MerchantService) UpdateMerchant(req requests.UpdateMerchantRequest, use
 
 	merchant.BusinessName = req.BusinessName
 	merchant.EmailPro = req.EmailPro
-	merchant.SIRET = req.SIRET
+	merchant.SIREN = req.SIREN
 	merchant.PhoneNumber = req.PhoneNumber
 
 	return s.repo.UpdateMerchant(merchant)

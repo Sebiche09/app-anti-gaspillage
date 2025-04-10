@@ -1,58 +1,140 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
+
 import 'constants/auth_status.dart';
 import 'providers/auth_provider.dart';
+import 'providers/basket_provider.dart';
 import 'services/auth_service.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/home/home_screen.dart';
+import 'services/api_service.dart';
+import 'services/basket_service.dart';
+import '/ui/screens/auth/login_screen.dart';
+import '/ui/screens/home_screen.dart';
+import '/ui/screens/explore_screen.dart';
 import 'utils/api_config.dart';
+import 'ui/widgets/home/home_header.dart';
+import 'ui/screens/loading_screen.dart';
+import 'ui/screens/main_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+  final authService = AuthService(baseUrl: ApiConfig.baseUrl);
+
   runApp(
     DevicePreview(
       enabled: true,
-      builder: (context) => const MyApp(),
+      builder: (context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AuthProvider>(
+            create: (_) => AuthProvider(authService),
+          ),
+          ChangeNotifierProvider<BasketsProvider>(
+            create: (_) => BasketsProvider(
+              BasketService(apiService: apiService),
+            ),
+          ),
+        ],
+        child: const LoadingApp(),
+      ),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LoadingApp extends StatefulWidget {
+  const LoadingApp({super.key});
+
+  @override
+  _LoadingAppState createState() => _LoadingAppState();
+}
+
+class _LoadingAppState extends State<LoadingApp> {
+  bool isLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadResources();
+  }
+
+  Future<void> _loadResources() async {
+    await HomeHeader.loadLocation();
+    setState(() {
+      isLoaded = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthProvider>(
-      create: (context) => AuthProvider(
-        AuthService(baseUrl: ApiConfig.baseUrl),
-      ),
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
-          return MaterialApp(
-            useInheritedMediaQuery: true,
-            locale: DevicePreview.locale(context),
-            builder: DevicePreview.appBuilder,
-            title: 'Sové Manjé',
-            theme: ThemeData(
-              primaryColor: const Color(0xFF3B4929),
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF3B4929),
-                primary: const Color(0xFF3B4929),
+    if (!isLoaded) {
+      return const MaterialApp(
+        home: LoadingScreen(),
+      );
+    }
+    return const MyApp();
+  }
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late Future<void> _initFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFuture = Provider.of<AuthProvider>(context, listen: false).initialize();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        return FutureBuilder(
+          future: _initFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const MaterialApp(home: LoadingScreen());
+            }
+
+            if (authProvider.status == AuthStatus.authenticated) {
+              Future.microtask(() {
+                Provider.of<BasketsProvider>(context, listen: false).fetchBaskets();
+              });
+            }
+
+            return MaterialApp(
+              useInheritedMediaQuery: true,
+              locale: DevicePreview.locale(context),
+              builder: DevicePreview.appBuilder,
+              title: 'Sové Manjé',
+              theme: ThemeData(
+                primaryColor: const Color(0xFF3B4929),
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color(0xFF3B4929),
+                  primary: const Color(0xFF3B4929),
+                ),
+                scaffoldBackgroundColor: Colors.white,
+                useMaterial3: true,
               ),
-              scaffoldBackgroundColor: const Color(0xFF3B4929),
-              useMaterial3: true,
-            ),
-            routes: {
-              '/login': (context) => const LoginScreen(),
-              '/home': (context) => const HomeScreen(),
-            },
-            initialRoute: authProvider.status == AuthStatus.authenticated
-                ? '/home'
-                : '/login',
-          );
-        },
-      ),
+              home: authProvider.status == AuthStatus.authenticated
+                  ? const MainScreen()
+                  : const LoginScreen(),
+              routes: {
+                '/login': (context) => const LoginScreen(),
+                '/home': (context) => const MainScreen(),
+                '/explore': (context) => const ExploreScreen(),
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

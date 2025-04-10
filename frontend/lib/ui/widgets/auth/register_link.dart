@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
+import '../../../constants/app_colors.dart';
 
-class LoginLink extends StatelessWidget {
+class RegisterLink extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const LoginLink({
+  const RegisterLink({
     Key? key,
     required this.onPressed,
   }) : super(key: key);
@@ -17,13 +17,13 @@ class LoginLink extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
-            'Dejà un compte ? ',
+            'Pas encore de compte ? ',
             style: TextStyle(color: Colors.grey),
           ),
           GestureDetector(
             onTap: onPressed,
             child: const Text(
-              'CONNEXION',
+              'INSCRIPTION',
               style: TextStyle(
                 color: AppColors.secondary,
                 fontWeight: FontWeight.bold,

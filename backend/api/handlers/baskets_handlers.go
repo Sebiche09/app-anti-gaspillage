@@ -44,6 +44,8 @@ func (h *BasketHandler) GetBaskets(c *gin.Context) {
 		basketResponse := responses.BasketResponse{
 			ID:            strconv.Itoa(int(basket.ID)),
 			Name:          basket.Name,
+			Latitude:      basket.Restaurant.Latitude,
+			Longitude:     basket.Restaurant.Longitude,
 			Address:       basket.Restaurant.Address,
 			Rating:        basket.Restaurant.Rating,
 			OriginalPrice: basket.OriginalPrice,

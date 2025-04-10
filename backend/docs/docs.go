@@ -2012,6 +2012,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "route de baduel 11"
                 },
+                "category_id": {
+                    "description": "ID de la catégorie (obligatoire)",
+                    "type": "integer",
+                    "example": 1
+                },
                 "city": {
                     "description": "Ville",
                     "type": "string",
@@ -2110,6 +2115,11 @@ const docTemplate = `{
                     "description": "Adresse complète",
                     "type": "string",
                     "example": "route de baduel 12"
+                },
+                "category_id": {
+                    "description": "ID de la catégorie (obligatoire)",
+                    "type": "integer",
+                    "example": 1
                 },
                 "city": {
                     "description": "Ville",

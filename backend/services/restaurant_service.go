@@ -1,18 +1,22 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/Sebiche09/app-anti-gaspillage.git/api/requests"
+	"github.com/Sebiche09/app-anti-gaspillage.git/geocoding"
 	"github.com/Sebiche09/app-anti-gaspillage.git/models"
 	"github.com/Sebiche09/app-anti-gaspillage.git/repositories"
 )
 
 type RestaurantService struct {
-	restaurantRepo *repositories.RestaurantRepository
-	merchantRepo   *repositories.MerchantRepository
+	restaurantRepo   *repositories.RestaurantRepository
+	merchantRepo     *repositories.MerchantRepository
+	geocodingService *geocoding.Service
 }
 
-func NewRestaurantService(restaurantRepo *repositories.RestaurantRepository, merchantRepo *repositories.MerchantRepository) *RestaurantService {
-	return &RestaurantService{restaurantRepo: restaurantRepo, merchantRepo: merchantRepo}
+func NewRestaurantService(restaurantRepo *repositories.RestaurantRepository, merchantRepo *repositories.MerchantRepository, geocodingService *geocoding.Service) *RestaurantService {
+	return &RestaurantService{restaurantRepo: restaurantRepo, merchantRepo: merchantRepo, geocodingService: geocodingService}
 }
 
 func (s *RestaurantService) CreateRestaurant(req requests.CreateRestaurantRequest, userID uint) error {
@@ -21,14 +25,21 @@ func (s *RestaurantService) CreateRestaurant(req requests.CreateRestaurantReques
 		return err
 	}
 
+	coordinates, err := s.geocodingService.GetCoordinatesFromAddress(req.Address, req.City, req.PostalCode)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la récupération des coordonnées géographiques: %w", err)
+	}
+
 	restaurant := &models.Restaurant{
 		Name:        req.Name,
-		SIREN:       req.SIREN,
 		Address:     req.Address,
 		City:        req.City,
 		PostalCode:  req.PostalCode,
 		PhoneNumber: req.PhoneNumber,
 		MerchantID:  merchand.ID,
+		CategoryID:  req.CategoryID,
+		Latitude:    coordinates.Latitude,
+		Longitude:   coordinates.Longitude,
 	}
 
 	return s.restaurantRepo.CreateRestaurant(restaurant)
@@ -58,7 +69,6 @@ func (s *RestaurantService) UpdateRestaurant(req requests.UpdateRestaurantReques
 	}
 
 	restaurant.Name = req.Name
-	restaurant.SIREN = req.SIREN
 	restaurant.Address = req.Address
 	restaurant.City = req.City
 	restaurant.PostalCode = req.PostalCode

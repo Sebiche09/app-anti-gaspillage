@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
-import '../../constants/app_styles.dart';
-import '../../constants/app_text.dart';
-import '../../widgets/auth/login_form.dart';
-import '../../widgets/auth/register_link.dart';
-import 'register_screen.dart';
+import '../../../constants/app_colors.dart';
+import '../../../constants/app_styles.dart';
+import '../../../constants/app_text.dart';
+import '../../widgets/auth/register_form.dart';
+import '../../widgets/auth/login_link.dart';
+import 'login_screen.dart'; 
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class LoginScreen extends StatelessWidget {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
-              mainAxisSize: MainAxisSize.min, 
+              mainAxisSize: MainAxisSize.min,  
               children: [
                 Image.asset(
                   'assets/logo.png',
@@ -26,27 +26,27 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  AppText.loginTitle,
+                  AppText.registerTitle,
                   style: AppStyles.titleStyle,
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  AppText.loginSubtitle,
+                  AppText.registerSubtitle,
                   style: AppStyles.subtitleStyle,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                const LoginForm(),
+                const RegisterForm(),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: RegisterLink(
+      bottomNavigationBar: LoginLink(
         onPressed: () {
           Navigator.push(
             context, 
-            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+            MaterialPageRoute(builder: (context) => const LoginScreen()), 
           );
         },
       ),

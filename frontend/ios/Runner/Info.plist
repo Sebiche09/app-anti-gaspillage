@@ -24,9 +24,17 @@
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Cette application a besoin d&#39;accéder à votre localisation</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Cette application a besoin d&#39;accéder à votre localisation</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
+	<key>MGLMapboxAccessToken</key>
+	<string>pk.eyJ1Ijoic2ViaWNoZTA5IiwiYSI6ImNtOTJxdnF1ajBjdDAybHNjYm9pM2xzeG4ifQ.1Ovl0-RqbjnpW1YhbKcGbw</string>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
