@@ -31,6 +31,7 @@ class BasketsProvider with ChangeNotifier {
       _baskets = await _basketService.getBaskets();
       _applyFilters(); 
       _isLoading = false;
+      debugState();
       notifyListeners();
     } catch (e) {
       _isLoading = false;

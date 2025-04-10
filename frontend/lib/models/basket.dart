@@ -7,6 +7,8 @@ class Basket {
   final double discountPrice;
   final String typeBasket;
   final String category;
+  final double latitude;
+  final double longitude;
 
   Basket({
     required this.id,
@@ -17,6 +19,8 @@ class Basket {
     required this.discountPrice,
     required this.typeBasket,
     required this.category,
+    required this.latitude,   
+    required this.longitude,  
   });
 
   factory Basket.fromJson(Map<String, dynamic> json) {
@@ -24,11 +28,13 @@ class Basket {
       id: json['id'],
       name: json['name'],
       address: json['address'],
-      rating: json['rating'].toDouble(),
-      originalPrice: json['originalPrice'].toDouble(),
-      discountPrice: json['discountPrice'].toDouble(),
+      rating: (json['rating'] ?? 0).toDouble(),
+      originalPrice: (json['originalPrice'] ?? 0).toDouble(),
+      discountPrice: (json['discountPrice'] ?? 0).toDouble(),
       typeBasket: json['typeBasket'],
       category: json['category'],
+      latitude: (json['latitude'] ?? 0).toDouble(),    
+      longitude: (json['longitude'] ?? 0).toDouble(),  
     );
   }
 }

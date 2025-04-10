@@ -33,32 +33,6 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFD700),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.star, size: 16),
-                      ),
-                    ),
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -66,7 +40,9 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
               // Boutons de navigation, partage et favoris
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -171,7 +147,6 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 12.0,
-              vertical: 5.0,
             ),
             child: Column(
               children: [

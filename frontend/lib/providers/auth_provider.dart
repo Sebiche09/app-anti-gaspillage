@@ -17,11 +17,26 @@ class AuthProvider with ChangeNotifier {
   String get errorMessage => _errorMessage;
   AuthStatus get status => _status;
   
+  Future<void> initialize() async {
+    print('👉 AuthProvider initializing...');
+    final isLoggedIn = await _authService.isLoggedIn();
+    print('✅ isLoggedIn: $isLoggedIn');
+    
+    if (isLoggedIn) {
+      _user = await _authService.getCurrentUser();
+      _status = AuthStatus.authenticated;
+    } else {
+      _status = AuthStatus.unauthenticated;
+    }
+
+    print('🔁 Status mis à jour : $_status');
+    notifyListeners();
+  }
+
   Future<bool> login(String email, String password) async {
   _status = AuthStatus.authenticating;
   _errorMessage = '';
   notifyListeners();
-
   try {
     final loginResponse = await _authService.login(email, password);
     

@@ -9,4 +9,6 @@ type BasketResponse struct {
 	DiscountPrice float64 `json:"discountPrice"`
 	TypeBasket    string  `json:"typeBasket"`
 	Category      string  `json:"category"`
+	Latitude      float64 `json:"latitude"`
+	Longitude     float64 `json:"longitude"`
 }
