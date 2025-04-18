@@ -16,10 +16,9 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>(); 
   final _emailController = TextEditingController(); 
   final _passwordController = TextEditingController(); 
-  bool _obscurePassword = true; //permet de cacher le mot de passe
+  bool _obscurePassword = true;
 
   @override
-  //permet de libérer les ressources utilisées par le formulaire
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -35,13 +34,18 @@ class _LoginFormState extends State<LoginForm> {
       _emailController.text.trim(),
       _passwordController.text,
     );
-    print('Login success: $success'); // Debugging
     if (!mounted) return;
     
     if (success) {
-      Navigator.pushReplacement(
+      // Redirection immédiate selon le statut isMerchant
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
+        authProvider.isMerchant ? '/merchant' : '/home',
+      );
+    } else {
+      // Message d'erreur en cas d'échec
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authProvider.errorMessage)),
       );
     }
   }

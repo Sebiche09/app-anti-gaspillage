@@ -3,11 +3,13 @@ class User {
   final String name;
   final String email;
   final String? avatar;
+  final bool isMerchant;
 
   User({
     required this.id,
     required this.name,
     required this.email,
+    required this.isMerchant,
     this.avatar,
   });
 
@@ -17,15 +19,7 @@ class User {
       name: json['name'],
       email: json['email'],
       avatar: json['avatar'],
+      isMerchant: json['isMerchant'] ?? false,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'avatar': avatar,
-    };
   }
 }

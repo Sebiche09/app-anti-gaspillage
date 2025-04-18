@@ -10,30 +10,24 @@ class AuthService {
   final String baseUrl;
   final FlutterSecureStorage _storage;
   
-  // Constantes pour le stockage
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _expiryTimeKey = 'token_expiry';
   static const String _userKey = 'user_data';
   
-  // Timeout pour les requêtes HTTP
   static const Duration _requestTimeout = Duration(seconds: 10);
-  
-  // Durée par défaut de validité du token
+
   static const Duration _tokenValidity = Duration(hours: 1);
   
-  // Cache en mémoire pour optimiser les performances
   String? _cachedToken;
   User? _cachedUser;
   DateTime? _cachedTokenExpiry;
   
-  // Constructeur avec injection de dépendance pour faciliter les tests
   AuthService({
     required this.baseUrl,
     FlutterSecureStorage? storage,
   }) : _storage = storage ?? const FlutterSecureStorage();
 
-  // Vérifie si l'utilisateur est connecté et si le token est valide
   Future<bool> isLoggedIn() async {
     try {
       final token = await getToken();
@@ -44,7 +38,6 @@ class AuthService {
     }
   }
 
-  // connexion utilisateur 
   Future<LoginResponse> login(String email, String password) async {
     final fullUrl = '$baseUrl/api/auth/login';
     
@@ -77,7 +70,6 @@ class AuthService {
     }
   }
 
-  // Traite une réponse de login réussie
   Future<LoginResponse> _handleSuccessfulLogin(http.Response response) async {
     final Map<String, dynamic> responseData = json.decode(response.body);
     final String token = responseData['token'] as String;
@@ -112,7 +104,6 @@ class AuthService {
     );
   }
 
-  // Traite une réponse de login échouée
   LoginResponse _handleFailedLogin(http.Response response) {
     String errorMessage;
     
@@ -132,7 +123,6 @@ class AuthService {
     );
   }
 
-  // Récupère l'utilisateur actuel (d'abord du cache, puis du stockage)
   Future<User?> getCurrentUser() async {
     if (_cachedUser != null) {
       return _cachedUser;
@@ -152,7 +142,6 @@ class AuthService {
     return null;
   }
 
-  // Récupère le token avec vérification d'expiration et refresh automatique
   Future<String?> getToken() async {
     // Vérifier d'abord le cache
     if (_cachedToken != null && _cachedTokenExpiry != null) {
@@ -192,7 +181,6 @@ class AuthService {
     return token;
   }
 
-  // Rafraîchit le token
   Future<bool> refreshToken() async {
     final refreshToken = await _storage.read(key: _refreshTokenKey);
     
@@ -238,81 +226,61 @@ class AuthService {
     }
   }
 
-  // Enregistre un nouvel utilisateur
   Future<RegisterResponse> register(String email, String password) async {
-  final url = '$baseUrl/api/auth/signup';
-  print(email + ""  +password);
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email.trim(),
-        'password': password,
-      }),
-    ).timeout(_requestTimeout);
-    print('Response status: ${response.statusCode}');
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      final loginResponse = await _handleSuccessfulLogin(response);
-      return RegisterResponse(
-        success: true,
-        token: loginResponse.token,
-        refreshToken: loginResponse.refreshToken,
-        user: loginResponse.user,
-        errorMessage: null,
-      );
-    } else {
-      final loginResponse = _handleFailedLogin(response);
+    final url = '$baseUrl/api/auth/signup';
+    print(email + ""  +password);
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email.trim(),
+          'password': password,
+        }),
+      ).timeout(_requestTimeout);
+      print('Response status: ${response.statusCode}');
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final loginResponse = await _handleSuccessfulLogin(response);
+        return RegisterResponse(
+          success: true,
+          token: loginResponse.token,
+          refreshToken: loginResponse.refreshToken,
+          user: loginResponse.user,
+          errorMessage: null,
+        );
+      } else {
+        final loginResponse = _handleFailedLogin(response);
+        return RegisterResponse(
+          success: false,
+          token: null,
+          refreshToken: null,
+          user: null,
+          errorMessage: loginResponse.errorMessage,
+        );
+      }
+    } catch (e) {
       return RegisterResponse(
         success: false,
         token: null,
         refreshToken: null,
         user: null,
-        errorMessage: loginResponse.errorMessage,
+        errorMessage: 'Erreur lors de l\'inscription: ${e.toString()}',
       );
     }
-  } catch (e) {
-    return RegisterResponse(
-      success: false,
-      token: null,
-      refreshToken: null,
-      user: null,
-      errorMessage: 'Erreur lors de l\'inscription: ${e.toString()}',
-    );
   }
-}
 
 
-  // Déconnexion avec nettoyage complet
   Future<void> logout() async {
-    // Nettoyer le cache
     _cachedToken = null;
     _cachedUser = null;
     _cachedTokenExpiry = null;
     
-    // Nettoyer le stockage
     await Future.wait([
       _storage.delete(key: _tokenKey),
       _storage.delete(key: _refreshTokenKey),
       _storage.delete(key: _expiryTimeKey),
       _storage.delete(key: _userKey),
     ]);
-    
-    try {
-      final token = await _storage.read(key: _tokenKey);
-      if (token != null) {
-        final url = '$baseUrl/api/auth/logout';
-        await http.post(
-          Uri.parse(url),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ).timeout(const Duration(seconds: 5));
-      }
-    } catch (e) {
-
-      debugPrint('Erreur lors de la déconnexion côté serveur: $e');
-    }
+    print('Déconnexion réussie');
   }
 }
