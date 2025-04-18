@@ -19,6 +19,17 @@ func NewRestaurantService(restaurantRepo *repositories.RestaurantRepository, mer
 	return &RestaurantService{restaurantRepo: restaurantRepo, merchantRepo: merchantRepo, geocodingService: geocodingService}
 }
 
+func (s *RestaurantService) GetCategories() ([]models.Category, error) {
+	categories, err := s.restaurantRepo.GetCategories()
+	if err != nil {
+		return nil, err
+	}
+	if len(categories) == 0 {
+		return nil, fmt.Errorf("aucune catégorie trouvée")
+	}
+	return categories, nil
+}
+
 func (s *RestaurantService) CreateRestaurant(req requests.CreateRestaurantRequest, userID uint) error {
 	merchand, err := s.merchantRepo.FindMerchantByUserID(userID)
 	if err != nil {

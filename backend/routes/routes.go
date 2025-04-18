@@ -29,18 +29,20 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 	authenticated := api.Group("")
 	authenticated.Use(middlewares.Authenticate)
 	{
+		authenticated.GET("/categories", h.Restaurant.GetCategories)
 		restaurants := authenticated.Group("/restaurants")
 		{
 			restaurants.GET("/", h.Restaurant.GetRestaurants)
 			restaurants.GET("/:id", h.Restaurant.GetRestaurant)
 
 			// Route pour obtenir les invitations en attente d'un restaurant
-			restaurants.GET("/:id/invitations", h.Invitation.GetPendingInvitations)
+			restaurants.GET("/:id/request-status-statustions", h.Invitation.GetPendingInvitations)
 		}
 
 		merchants := authenticated.Group("/merchants")
 		{
 			merchants.POST("/", h.Merchant.CreateMerchantRequest)
+			merchants.GET("/request-status", h.Merchant.MerchantRequestStatus)
 			merchants.GET("/restaurants", h.Restaurant.GetRestaurantsMerchant)
 			merchants.PUT("/restaurants/:id", h.Restaurant.UpdateRestaurant)
 			merchants.POST("/restaurants", h.Restaurant.CreateRestaurant)

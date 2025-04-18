@@ -127,8 +127,8 @@ definitions:
       phone_number:
         description: Numéro de téléphone (optionnel, max 15 caractères)
         type: string
-      siret:
-        description: Numéro SIRET
+      siren:
+        description: Numéro SIREN
         type: string
       updatedAt:
         type: string
@@ -142,7 +142,7 @@ definitions:
     required:
     - business_name
     - email_pro
-    - siret
+    - siren
     type: object
   models.MerchantRequest:
     properties:
@@ -158,7 +158,7 @@ definitions:
         type: integer
       phone_number:
         type: string
-      siret:
+      siren:
         type: string
       status:
         description: pending, approved, rejected
@@ -173,7 +173,7 @@ definitions:
     required:
     - business_name
     - email_pro
-    - siret
+    - siren
     type: object
   models.Response:
     properties:
@@ -203,6 +203,12 @@ definitions:
         $ref: '#/definitions/gorm.DeletedAt'
       id:
         type: integer
+      latitude:
+        description: Latitude (format décimal)
+        type: number
+      longitude:
+        description: Longitude (format décimal)
+        type: number
       merchant:
         allOf:
         - $ref: '#/definitions/models.Merchant'
@@ -222,9 +228,6 @@ definitions:
       rating:
         description: Note moyenne (sur 5)
         type: number
-      siren:
-        description: SIREN (exactement 9 chiffres, unique)
-        type: string
       updatedAt:
         type: string
     type: object
@@ -296,13 +299,13 @@ definitions:
       phone_number:
         example: "+32452101010"
         type: string
-      siret:
-        example: "78467169500087"
+      siren:
+        example: "784671691"
         type: string
     required:
     - business_name
     - email_pro
-    - siret
+    - siren
     type: object
   requests.CreateRestaurantRequest:
     properties:
@@ -329,10 +332,6 @@ definitions:
       postal_code:
         description: Code postal (limité à 10 caractères pour compatibilité internationale)
         example: "97300"
-        type: string
-      siren:
-        description: SIREN (exactement 9 chiffres, unique)
-        example: "123456789"
         type: string
     type: object
   requests.LoginRequest:
@@ -373,14 +372,14 @@ definitions:
       phone_number:
         example: "+32452101010"
         type: string
-      siret:
-        description: Numéro SIRET
-        example: "78467169500089"
+      siren:
+        description: Numéro SIREN
+        example: "784671695"
         type: string
     required:
     - business_name
     - email_pro
-    - siret
+    - siren
     type: object
   requests.UpdateRestaurantRequest:
     properties:
@@ -408,10 +407,6 @@ definitions:
         description: Code postal (limité à 10 caractères pour compatibilité internationale)
         example: "97301"
         type: string
-      siren:
-        description: SIREN (exactement 9 chiffres, unique)
-        example: "123456780"
-        type: string
     type: object
   responses.BasketResponse:
     properties:
@@ -423,6 +418,10 @@ definitions:
         type: number
       id:
         type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
       name:
         type: string
       originalPrice:
@@ -860,6 +859,33 @@ paths:
       summary: Update a basket
       tags:
       - Baskets
+  /api/categories:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
   /api/invitations:
     post:
       consumes:
@@ -1177,6 +1203,44 @@ paths:
       summary: Update un marchand
       tags:
       - Merchants
+  /api/merchants/request-status:
+    get:
+      description: Récupère les détails de la demande de marchand de l'utilisateur
+        actuel
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Détails de la demande
+          schema:
+            $ref: '#/definitions/models.MerchantRequest'
+        "401":
+          description: Non authentifié
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Non autorisé
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Demande non trouvée
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Erreur serveur
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Récupérer la demande du marchand
+      tags:
+      - Users
   /api/merchants/restaurants:
     get:
       consumes:

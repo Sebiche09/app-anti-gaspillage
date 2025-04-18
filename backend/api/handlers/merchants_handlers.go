@@ -19,6 +19,45 @@ func NewMerchantHandler(service *services.MerchantService) *MerchantHandler {
 	return &MerchantHandler{service: service}
 }
 
+// @Summary Récupérer la demande du marchand
+// @Description Récupère les détails de la demande de marchand de l'utilisateur actuel
+// @Tags Users
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} models.MerchantRequest "Détails de la demande"
+// @Failure 401 {object} models.ErrorResponse "Non authentifié"
+// @Failure 403 {object} models.ErrorResponse "Non autorisé"
+// @Failure 404 {object} models.ErrorResponse "Demande non trouvée"
+// @Failure 500 {object} models.ErrorResponse "Erreur serveur"
+// @Router /api/merchants/request-status [get]
+func (h *MerchantHandler) MerchantRequestStatus(c *gin.Context) {
+	userID := c.MustGet("userId").(uint)
+
+	request, err := h.service.MerchantRequestStatus(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erreur lors de la récupération de la demande"})
+		return
+	}
+
+	if request == nil {
+		// Si pas de demande, on retourne 404
+		c.JSON(http.StatusNotFound, gin.H{"error": "Aucune demande trouvée"})
+		return
+	}
+
+	// Renvoyer toutes les informations de la demande
+	c.JSON(http.StatusOK, gin.H{
+		"status":        request.Status,
+		"business_name": request.BusinessName,
+		"email_pro":     request.EmailPro,
+		"siren":         request.SIREN,
+		"phone_number":  request.PhoneNumber,
+		"created_at":    request.CreatedAt,
+		"updated_at":    request.UpdatedAt,
+	})
+}
+
 // @Summary Créer une demande de marchand
 // @Description Permet à un utilisateur de soumettre une demande pour devenir marchand
 // @Tags Users

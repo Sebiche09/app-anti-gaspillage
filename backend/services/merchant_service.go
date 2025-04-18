@@ -16,6 +16,18 @@ func NewMerchantService(repo *repositories.MerchantRepository) *MerchantService 
 	return &MerchantService{repo: repo}
 }
 
+// Vérifier le statut de la demande de marchand
+func (s *MerchantService) MerchantRequestStatus(userID uint) (*models.MerchantRequest, error) {
+	request, err := s.repo.FindMerchantStatusByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if request == nil {
+		return nil, nil
+	}
+	return request, nil
+}
+
 // Créer une demande de marchand
 func (s *MerchantService) CreateMerchantRequest(req requests.CreateMerchantRequest, userID uint) error {
 	existingRequest, err := s.repo.FindPendingRequestByUserID(userID)

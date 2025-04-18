@@ -17,6 +17,15 @@ func (r *RestaurantRepository) CreateRestaurant(restaurant *models.Restaurant) e
 	return r.db.Create(restaurant).Error
 }
 
+func (r *RestaurantRepository) GetCategories() ([]models.Category, error) {
+	var categories []models.Category
+	err := r.db.Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
+
 func (r *RestaurantRepository) GetRestaurantsMerchant(merchantID uint) ([]models.Restaurant, error) {
 	var restaurants []models.Restaurant
 	err := r.db.Preload("Merchant").Where("merchant_id = ?", merchantID).Find(&restaurants).Error

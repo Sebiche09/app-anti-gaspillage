@@ -19,7 +19,7 @@ type MerchantRequest struct {
 	gorm.Model
 	BusinessName string `json:"business_name" binding:"required" gorm:"type:varchar(255);not null"`
 	EmailPro     string `json:"email_pro" binding:"required,email" gorm:"type:varchar(255);not null"`
-	SIREN        string `json:"siret" binding:"required,len=9" gorm:"type:varchar(9);unique;not null"`
+	SIREN        string `json:"siren" binding:"required,len=9" gorm:"type:varchar(9);unique;not null"`
 	PhoneNumber  string `json:"phone_number" gorm:"type:varchar(15)"`
 	Status       string `json:"status" gorm:"type:varchar(20);default:'pending'"` // pending, approved, rejected
 

@@ -17,6 +17,27 @@ func NewRestaurantHandler(service *services.RestaurantService) *RestaurantHandle
 	return &RestaurantHandler{service: service}
 }
 
+// summary: Récupérer toutes les catégories
+// description: Permet de récupérer la liste de toutes les catégories de restaurants
+// tags: Restaurants
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} models.Response
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/categories [get]
+func (h *RestaurantHandler) GetCategories(c *gin.Context) {
+	categories, err := h.service.GetCategories()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": categories})
+}
+
 // summary: Créer un restaurant
 // description: Permet à un marchand de créer un restaurant
 // tags: Restaurants
