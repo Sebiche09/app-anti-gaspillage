@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'explore_screen.dart';
+import 'plus_screen.dart';
+import 'order_screen.dart';
 import '../../constants/app_colors.dart';
 
 class MainScreen extends StatefulWidget {
@@ -16,6 +18,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     ExploreScreen(),
+    OrderScreen(),
+    PlusScreen(),
   ];
 
   void _onItemTapped(int index) {

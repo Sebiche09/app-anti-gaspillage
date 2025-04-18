@@ -32,25 +32,18 @@ class ApiService {
   Future<dynamic> get(String endpoint) async {
     try {
       final isLoggedIn = await isAuthenticated();
-      print("🔑 Authentifié: $isLoggedIn");
 
       if (!isLoggedIn) {
         throw Exception('User not authenticated');
       }
 
       final headers = await getHeaders();
-      print("📤 URL complète: $baseUrl$endpoint");
-      print("📤 En-têtes: $headers");
 
 
       final response = await http.get(
         Uri.parse('$baseUrl$endpoint'),
         headers: headers,
       );
-
-      print("📥 Statut réponse: ${response.statusCode}");
-      print("📥 Corps réponse: ${response.body.length > 100 ? '${response.body.substring(0, 100)}...' : response.body}");
-
       return _handleResponse(response);
     } catch (e) {
       print("❌ Erreur: $e");
@@ -78,11 +71,16 @@ class ApiService {
   }
 
   dynamic _handleResponse(http.Response response) {
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.body.isNotEmpty) {
+        return json.decode(response.body);
+      } else {
+        return null;
+      }
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized: Please log in again');
     } else {
+      print("Erreur HTTP ${response.statusCode}: ${response.body}");
       throw Exception('Request failed with status: ${response.statusCode}');
     }
   }
