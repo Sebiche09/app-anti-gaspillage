@@ -15,6 +15,18 @@ func NewMerchantRepository(db *gorm.DB) *MerchantRepository {
 	return &MerchantRepository{db: db}
 }
 
+func (r *MerchantRepository) FindMerchantStatusByUserID(userID uint) (*models.MerchantRequest, error) {
+	var request models.MerchantRequest
+	err := r.db.Where("user_id = ?", userID).First(&request).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &request, nil
+}
+
 func (r *MerchantRepository) CreateMerchantRequest(request *models.MerchantRequest) error {
 	return r.db.Create(request).Error
 }

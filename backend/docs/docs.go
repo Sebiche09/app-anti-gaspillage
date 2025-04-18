@@ -675,6 +675,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/categories": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/invitations": {
             "post": {
                 "security": [
@@ -1161,6 +1205,64 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/merchants/request-status": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Récupère les détails de la demande de marchand de l'utilisateur actuel",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Récupérer la demande du marchand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détails de la demande",
+                        "schema": {
+                            "$ref": "#/definitions/models.MerchantRequest"
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Demande non trouvée",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
                         }
@@ -1731,7 +1833,7 @@ const docTemplate = `{
             "required": [
                 "business_name",
                 "email_pro",
-                "siret"
+                "siren"
             ],
             "properties": {
                 "business_name": {
@@ -1755,8 +1857,8 @@ const docTemplate = `{
                     "description": "Numéro de téléphone (optionnel, max 15 caractères)",
                     "type": "string"
                 },
-                "siret": {
-                    "description": "Numéro SIRET",
+                "siren": {
+                    "description": "Numéro SIREN",
                     "type": "string"
                 },
                 "updatedAt": {
@@ -1781,7 +1883,7 @@ const docTemplate = `{
             "required": [
                 "business_name",
                 "email_pro",
-                "siret"
+                "siren"
             ],
             "properties": {
                 "business_name": {
@@ -1802,7 +1904,7 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string"
                 },
-                "siret": {
+                "siren": {
                     "type": "string"
                 },
                 "status": {
@@ -1863,6 +1965,14 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "latitude": {
+                    "description": "Latitude (format décimal)",
+                    "type": "number"
+                },
+                "longitude": {
+                    "description": "Longitude (format décimal)",
+                    "type": "number"
+                },
                 "merchant": {
                     "description": "Relation avec le commerçant",
                     "allOf": [
@@ -1890,10 +2000,6 @@ const docTemplate = `{
                 "rating": {
                     "description": "Note moyenne (sur 5)",
                     "type": "number"
-                },
-                "siren": {
-                    "description": "SIREN (exactement 9 chiffres, unique)",
-                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -1983,7 +2089,7 @@ const docTemplate = `{
             "required": [
                 "business_name",
                 "email_pro",
-                "siret"
+                "siren"
             ],
             "properties": {
                 "business_name": {
@@ -1998,9 +2104,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "+32452101010"
                 },
-                "siret": {
+                "siren": {
                     "type": "string",
-                    "example": "78467169500087"
+                    "example": "784671691"
                 }
             }
         },
@@ -2036,11 +2142,6 @@ const docTemplate = `{
                     "description": "Code postal (limité à 10 caractères pour compatibilité internationale)",
                     "type": "string",
                     "example": "97300"
-                },
-                "siren": {
-                    "description": "SIREN (exactement 9 chiffres, unique)",
-                    "type": "string",
-                    "example": "123456789"
                 }
             }
         },
@@ -2084,7 +2185,7 @@ const docTemplate = `{
             "required": [
                 "business_name",
                 "email_pro",
-                "siret"
+                "siren"
             ],
             "properties": {
                 "business_name": {
@@ -2101,10 +2202,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "+32452101010"
                 },
-                "siret": {
-                    "description": "Numéro SIRET",
+                "siren": {
+                    "description": "Numéro SIREN",
                     "type": "string",
-                    "example": "78467169500089"
+                    "example": "784671695"
                 }
             }
         },
@@ -2140,11 +2241,6 @@ const docTemplate = `{
                     "description": "Code postal (limité à 10 caractères pour compatibilité internationale)",
                     "type": "string",
                     "example": "97301"
-                },
-                "siren": {
-                    "description": "SIREN (exactement 9 chiffres, unique)",
-                    "type": "string",
-                    "example": "123456780"
                 }
             }
         },
@@ -2162,6 +2258,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
                 },
                 "name": {
                     "type": "string"
