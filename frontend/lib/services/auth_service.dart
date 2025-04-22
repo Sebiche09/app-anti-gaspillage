@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
 import '../models/login_response.dart';
 import '../models/register_response.dart';
+import '../constants/api_endpoints.dart';
 
 class AuthService {
   final String baseUrl;
@@ -39,7 +40,7 @@ class AuthService {
   }
 
   Future<LoginResponse> login(String email, String password) async {
-    final fullUrl = '$baseUrl/api/auth/login';
+    final fullUrl = '$baseUrl${ApiEndpoints.login}';
     
     try {
       final response = await http.post(
@@ -189,7 +190,7 @@ class AuthService {
     }
     
     try {
-      final url = '$baseUrl/api/auth/refresh';
+      final url = '$baseUrl${ApiEndpoints.refreshToken}';
       
       final response = await http.post(
         Uri.parse(url),
@@ -227,7 +228,7 @@ class AuthService {
   }
 
   Future<RegisterResponse> register(String email, String password) async {
-    final url = '$baseUrl/api/auth/signup';
+    final url = '$baseUrl${ApiEndpoints.register}';
     print(email + ""  +password);
     try {
       final response = await http.post(

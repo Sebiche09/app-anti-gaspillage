@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_service.dart';
+import '../constants/api_endpoints.dart';
 
 class MerchantService {
   final ApiService apiService;
@@ -27,7 +28,7 @@ class MerchantService {
         'siren': siren,
         'phone_number': phoneNumber,
       };
-      final response = await apiService.post('/api/merchants/', data);
+      final response = await apiService.post('${ApiEndpoints.merchantInfo}', data);
       
       return {
         'success': true,
@@ -43,7 +44,7 @@ class MerchantService {
 
   Future<Map<String, dynamic>> checkMerchantStatus() async {
   try {
-    final response = await apiService.get('/api/merchants/request-status');
+    final response = await apiService.get('${ApiEndpoints.merchantRequestStatus}');
     print("Response: $response");
     return response;
   } catch (e) {

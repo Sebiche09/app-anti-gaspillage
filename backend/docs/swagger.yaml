@@ -254,6 +254,25 @@ definitions:
     - email
     - password_hash
     type: object
+  requests.BasketConfigurationRequest:
+    properties:
+      daily_availabilities:
+        description: Configuration des disponibilités par jour (obligatoire)
+        items:
+          $ref: '#/definitions/requests.DailyAvailabilityRequest'
+        type: array
+      price:
+        description: Prix du panier (obligatoire, doit être supérieur à 0)
+        example: 9.99
+        type: number
+      video_url:
+        description: URL facultative d'une vidéo de présentation
+        example: https://example.com/video.mp4
+        type: string
+    required:
+    - daily_availabilities
+    - price
+    type: object
   requests.CreateBasketRequest:
     properties:
       description:
@@ -333,6 +352,23 @@ definitions:
         description: Code postal (limité à 10 caractères pour compatibilité internationale)
         example: "97300"
         type: string
+    type: object
+  requests.DailyAvailabilityRequest:
+    properties:
+      day_of_week:
+        description: Jour de la semaine (1=Lundi, 7=Dimanche)
+        example: 2
+        maximum: 7
+        minimum: 1
+        type: integer
+      number_of_baskets:
+        description: Nombre de paniers disponibles ce jour
+        example: 5
+        minimum: 0
+        type: integer
+    required:
+    - day_of_week
+    - number_of_baskets
     type: object
   requests.LoginRequest:
     properties:
@@ -1377,6 +1413,56 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       security:
       - Bearer: []
+  /api/merchants/restaurants/{id}/basket-configuration:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID du restaurant
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Données de configuration
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/requests.BasketConfigurationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "403":
+          description: Accès refusé
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Restaurant non trouvé
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
   /api/restaurants:
     get:
       consumes:
@@ -1432,6 +1518,42 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+  /api/restaurants/{id}/basket-configuration:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID du restaurant
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Configuration non trouvée
           schema:
             $ref: '#/definitions/models.ErrorResponse'
         "500":

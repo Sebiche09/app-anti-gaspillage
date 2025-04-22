@@ -26,6 +26,8 @@ func Init() *gorm.DB {
 		&models.RestaurantStaff{},
 		&models.Invitation{},
 		&models.Category{},
+		&models.BasketConfiguration{},
+		&models.DailyBasketAvailability{},
 	)
 	initDefaultCategories(db)
 	return db

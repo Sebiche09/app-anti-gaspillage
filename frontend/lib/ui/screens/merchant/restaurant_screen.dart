@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
 import '../../../models/restaurantCategory.dart'; 
 import '../../../providers/restaurant_provider.dart';
+import 'basket_configuration_screen.dart';
 
 class RestaurantScreen extends StatefulWidget {
   const RestaurantScreen({Key? key}) : super(key: key);
@@ -18,7 +19,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   final _cityController = TextEditingController();
   final _postalCodeController = TextEditingController();
   final _phoneNumberController = TextEditingController();
-  
+
   int? _selectedCategoryId;
   bool _isLoading = false;
   List<RestaurantCategory> _categories = [];
@@ -68,46 +69,54 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedCategoryId == null) {
+  if (_formKey.currentState!.validate()) {
+    if (_selectedCategoryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Veuillez sélectionner une catégorie')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final restaurantId = await Provider.of<RestaurantProvider>(context, listen: false).createRestaurant(
+        name: _nameController.text,
+        address: _addressController.text,
+        city: _cityController.text,
+        postalCode: _postalCodeController.text,
+        phoneNumber: _phoneNumberController.text,
+        categoryId: _selectedCategoryId!,
+      );
+
+      setState(() => _isLoading = false);
+      print("✅ Restaurant ID obtenu : $restaurantId");
+      if (restaurantId != null) {
+        print("✅ Restaurant ID obtenu 2 : $restaurantId");
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Veuillez sélectionner une catégorie')),
+          const SnackBar(content: Text('Restaurant créé avec succès')),
         );
-        return;
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BasketConfigurationScreen(restaurantId: restaurantId),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la création du restaurant')),
+        );
       }
-
-      setState(() => _isLoading = true);
-
-      try {
-        final success = await Provider.of<RestaurantProvider>(context, listen: false).createRestaurant(
-          name: _nameController.text,
-          address: _addressController.text,
-          city: _cityController.text,
-          postalCode: _postalCodeController.text,
-          phoneNumber: _phoneNumberController.text,
-          categoryId: _selectedCategoryId!,
-        );
-
-        setState(() => _isLoading = false);
-
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Restaurant créé avec succès')),
-          );
-          Navigator.of(context).pop(); 
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erreur lors de la création du restaurant')),
-          );
-        }
-      } catch (e) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${e.toString()}')),
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: ${e.toString()}')),
         );
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +127,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
+      backgroundColor: AppColors.background,
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : SingleChildScrollView(

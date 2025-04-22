@@ -17,6 +17,76 @@ func NewRestaurantHandler(service *services.RestaurantService) *RestaurantHandle
 	return &RestaurantHandler{service: service}
 }
 
+// summary: Créer ou mettre à jour une configuration de panier
+// description: Permet à un marchand de créer ou mettre à jour une configuration de panier pour son restaurant
+// tags: Restaurants, Paniers
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du restaurant"
+// @Param input body requests.BasketConfigurationRequest true "Données de configuration"
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 403 {object} models.ErrorResponse "Accès refusé"
+// @Failure 404 {object} models.ErrorResponse "Restaurant non trouvé"
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/merchants/restaurants/{id}/basket-configuration [post]
+func (h *RestaurantHandler) CreateOrUpdateBasketConfiguration(c *gin.Context) {
+	restaurantID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de restaurant invalide"})
+		return
+	}
+
+	userID := c.MustGet("userId").(uint)
+	println("userID", userID)
+
+	var req requests.BasketConfigurationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config, err := h.service.CreateOrUpdateBasketConfiguration(uint(restaurantID), req, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration de panier mise à jour avec succès", "data": config})
+}
+
+// summary: Obtenir la configuration de panier d'un restaurant
+// description: Permet d'obtenir la configuration de panier pour un restaurant spécifique
+// tags: Restaurants, Paniers
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du restaurant"
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse "Configuration non trouvée"
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/restaurants/{id}/basket-configuration [get]
+func (h *RestaurantHandler) GetBasketConfiguration(c *gin.Context) {
+	restaurantID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de restaurant invalide"})
+		return
+	}
+
+	config, err := h.service.GetBasketConfiguration(uint(restaurantID), c.MustGet("userId").(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration de panier non trouvée"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": config})
+}
+
 // summary: Récupérer toutes les catégories
 // description: Permet de récupérer la liste de toutes les catégories de restaurants
 // tags: Restaurants
@@ -61,12 +131,17 @@ func (h *RestaurantHandler) CreateRestaurant(c *gin.Context) {
 
 	userID := c.MustGet("userId").(uint)
 
-	if err := h.service.CreateRestaurant(req, userID); err != nil {
+	restaurant, err := h.service.CreateRestaurant(req, userID)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Votre demande a été soumise avec succès"})
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Votre restaurant a été créé avec succès",
+		"data":    restaurant,
+	})
+
 }
 
 // summary: Mise à jour d'un restaurant

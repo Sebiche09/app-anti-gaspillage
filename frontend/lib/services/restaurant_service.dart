@@ -1,6 +1,7 @@
-import 'dart:convert';
+simport 'dart:convert';
 import '../models/restaurantCategory.dart';
 import 'api_service.dart';
+import '../constants/api_endpoints.dart';
 
 class RestaurantService {
   final ApiService _apiService;
@@ -10,7 +11,7 @@ class RestaurantService {
   
   Future<List<RestaurantCategory>> getCategories() async {
     try {
-      final response = await _apiService.get('/api/categories');
+      final response = await _apiService.get('${ApiEndpoints.restaurantCategories}');
       print("Réponse brute de l'API: $response"); // Ajoutez ce log
       
       // La réponse est probablement un Map avec une clé 'data', pas directement une List
@@ -49,9 +50,9 @@ class RestaurantService {
         'category_id': categoryId,
       };
       
-      final response = await _apiService.post('/api/merchants/restaurants', data);
-      
+      final response = await _apiService.post('${ApiEndpoints.restaurant}', data);
       if (response != null) {
+        print("Données extraites lors de la création du restaurant: $response");
         return {
           'success': true,
           'data': response,

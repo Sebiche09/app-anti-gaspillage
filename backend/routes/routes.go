@@ -46,6 +46,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 			merchants.GET("/restaurants", h.Restaurant.GetRestaurantsMerchant)
 			merchants.PUT("/restaurants/:id", h.Restaurant.UpdateRestaurant)
 			merchants.POST("/restaurants", h.Restaurant.CreateRestaurant)
+
+			merchants.POST("/restaurants/:id/basket-configuration", h.Restaurant.CreateOrUpdateBasketConfiguration)
+			merchants.GET("/restaurants/:id/basket-configuration", h.Restaurant.GetBasketConfiguration)
 		}
 
 		merchants.Use(middlewares.RequireMerchantWithSync(db))

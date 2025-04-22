@@ -20,6 +20,9 @@ import 'services/merchant_service.dart';
 import 'providers/restaurant_provider.dart';
 import 'services/restaurant_service.dart';
 import 'ui/screens/merchant/restaurant_screen.dart';
+import 'ui/screens/merchant/basket_configuration_screen.dart';
+import 'providers/basket_configuration_provider.dart';
+import 'services/basket_configuration_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +53,12 @@ void main() async {
               restaurantService: RestaurantService(apiService: apiService),
             ),
           ),
+          ChangeNotifierProvider<BasketConfigurationProvider>(
+            create: (_) => BasketConfigurationProvider(
+              service: BasketConfigurationService(apiService: apiService),
+            ),
+          ),
+
         ],
         child: const LoadingApp(),
       ),

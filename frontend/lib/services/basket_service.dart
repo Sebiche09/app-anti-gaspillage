@@ -1,5 +1,6 @@
 import '../models/basket.dart';
 import 'api_service.dart';
+import '../constants/api_endpoints.dart';
 
 class BasketService {
   final ApiService _apiService;
@@ -9,7 +10,7 @@ class BasketService {
 
   Future<List<Basket>> getBaskets() async {
     try {
-      final data = await _apiService.get('/api/baskets/') as List<dynamic>;
+      final data = await _apiService.get('${ApiEndpoints.baskets}') as List<dynamic>;
       return data.map((json) => Basket.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to load baskets: $e');
@@ -18,7 +19,7 @@ class BasketService {
 
   Future<Basket> getBasketById(String id) async {
     try {
-      final data = await _apiService.get('/api/baskets/$id');
+      final data = await _apiService.get('${ApiEndpoints.basketById}$id');
       return Basket.fromJson(data);
     } catch (e) {
       throw Exception('Failed to load basket: $e');

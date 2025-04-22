@@ -33,7 +33,7 @@ class RestaurantProvider with ChangeNotifier {
     }
   }
   
-  Future<bool> createRestaurant({
+  Future<int?> createRestaurant({
     required String name,
     required String address,
     required String city,
@@ -53,15 +53,21 @@ class RestaurantProvider with ChangeNotifier {
         phoneNumber: phoneNumber,
         categoryId: categoryId,
       );
-      
-      return result['success'] ?? false;
+      if (result['success'] == true) {
+        print("Restaurant créé avec succès: $result");
+        final responseData = result['data']['data'];
+        final int? restaurantId = responseData['ID'];
+        print("✅ ID du restaurant créé: $restaurantId");
+        return restaurantId;
+      }
     } catch (e) {
       _setError(e.toString());
-      return false;
+      return null;
     } finally {
       _setLoading(false);
     }
   }
+
   
   void _setLoading(bool loading) {
     _isLoading = loading;

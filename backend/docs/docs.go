@@ -1486,6 +1486,84 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/merchants/restaurants/{id}/basket-configuration": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID du restaurant",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Données de configuration",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.BasketConfigurationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Accès refusé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Restaurant non trouvé",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/restaurants": {
             "get": {
                 "security": [
@@ -1574,6 +1652,63 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/restaurants/{id}/basket-configuration": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID du restaurant",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Configuration non trouvée",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
                         }
@@ -2039,6 +2174,32 @@ const docTemplate = `{
                 }
             }
         },
+        "requests.BasketConfigurationRequest": {
+            "type": "object",
+            "required": [
+                "daily_availabilities",
+                "price"
+            ],
+            "properties": {
+                "daily_availabilities": {
+                    "description": "Configuration des disponibilités par jour (obligatoire)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/requests.DailyAvailabilityRequest"
+                    }
+                },
+                "price": {
+                    "description": "Prix du panier (obligatoire, doit être supérieur à 0)",
+                    "type": "number",
+                    "example": 9.99
+                },
+                "video_url": {
+                    "description": "URL facultative d'une vidéo de présentation",
+                    "type": "string",
+                    "example": "https://example.com/video.mp4"
+                }
+            }
+        },
         "requests.CreateBasketRequest": {
             "type": "object",
             "required": [
@@ -2142,6 +2303,28 @@ const docTemplate = `{
                     "description": "Code postal (limité à 10 caractères pour compatibilité internationale)",
                     "type": "string",
                     "example": "97300"
+                }
+            }
+        },
+        "requests.DailyAvailabilityRequest": {
+            "type": "object",
+            "required": [
+                "day_of_week",
+                "number_of_baskets"
+            ],
+            "properties": {
+                "day_of_week": {
+                    "description": "Jour de la semaine (1=Lundi, 7=Dimanche)",
+                    "type": "integer",
+                    "maximum": 7,
+                    "minimum": 1,
+                    "example": 2
+                },
+                "number_of_baskets": {
+                    "description": "Nombre de paniers disponibles ce jour",
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 5
                 }
             }
         },
