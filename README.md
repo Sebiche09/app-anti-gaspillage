@@ -36,18 +36,10 @@ docker-compose up -d --build
 - une fois dans le terminal , tapper la commande docker-compose up
 Le projet est pret
 
-## Contribution
-
-Les contributions sont bienvenues ! Si vous souhaitez participer au développement de FoodSaver, veuillez suivre les étapes suivantes :
-
-1. Cloner le répertoire Git
-2. Créer une branche pour vos modifications
-3. Envoyer une pull request avec une description détaillée de vos modifications
-
 ## Licence
 
 Sové Manjé est sous licence. Vous pouvez utiliser, modifier et redistribuer le code sous les conditions de la licence.
 
 ## Remerciements
 
-- **Nicolas Histel** pour sa contribution au projet
+- **Nicolas Histel** pour sa contribution au projet d'un point de vue marketing
