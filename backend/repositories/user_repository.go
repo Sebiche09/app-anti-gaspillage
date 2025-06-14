@@ -25,6 +25,17 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
+func (r *UserRepository) FindByID(userID uint) (*models.User, error) {
+	var user models.User
+	if err := r.DB.First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepository) Update(user *models.User) error {
+	return r.DB.Save(user).Error
+}
 func (r *UserRepository) IsMerchant(userID uint) (bool, error) {
 	var merchantCount int64
 
