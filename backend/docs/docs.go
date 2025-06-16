@@ -352,6 +352,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/validate-code": {
+            "post": {
+                "description": "Valide le code envoyé par email et active le compte",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Valider le code de confirmation",
+                "parameters": [
+                    {
+                        "description": "Email et code",
+                        "name": "validation",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CodeValidationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/baskets/": {
             "get": {
                 "security": [
@@ -1678,6 +1724,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CodeValidationRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.ProcessRequestInput": {
             "type": "object",
             "required": [
@@ -2026,6 +2083,10 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "isEmailConfirmed": {
+                    "description": "L'email a-t-il été confirmé ?",
+                    "type": "boolean"
+                },
                 "is_admin": {
                     "description": "Est-ce un administrateur ?",
                     "type": "boolean"
@@ -2035,6 +2096,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                },
+                "validationCode": {
+                    "description": "Code de validation pour l'inscription",
                     "type": "string"
                 }
             }

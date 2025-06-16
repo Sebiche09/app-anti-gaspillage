@@ -9,7 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const secretKey = "secret"
+func getSecretKey() []byte {
+	return []byte(GetEnv("JWT_SECRET"))
+}
 
 func GenerateInvitationToken(restaurantID uint, email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -19,7 +21,7 @@ func GenerateInvitationToken(restaurantID uint, email string) (string, error) {
 		"exp":           time.Now().Add(time.Hour * 24 * 7).Unix(),
 	})
 
-	return token.SignedString([]byte(secretKey))
+	return token.SignedString(getSecretKey())
 }
 
 func VerifyInvitationToken(tokenString string) (uint, string, error) {
@@ -28,7 +30,7 @@ func VerifyInvitationToken(tokenString string) (uint, string, error) {
 		if !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
-		return []byte(secretKey), nil
+		return getSecretKey(), nil
 	})
 
 	if err != nil {
@@ -55,10 +57,21 @@ func VerifyInvitationToken(tokenString string) (uint, string, error) {
 	return restaurantID, email, nil
 }
 
+// ---------------------------------------------------------------
 func GenerateUniqueInviteCode() string {
-	b := make([]byte, 6) // 6 octets donneront 12 caractères en hexadécimal
+	b := make([]byte, 6)
 	rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+func GenerateValidationCode() string {
+	n := 6
+	b := make([]byte, n)
+	rand.Read(b)
+	for i := range b {
+		b[i] = '0' + (b[i] % 10)
+	}
+	return string(b)
 }
 
 // ---------------------------------------------------------------
@@ -74,7 +87,7 @@ func GenerateToken(email string, userId uint, isAdmin bool,
 		"exp":              time.Now().Add(time.Hour * 12).Unix(),
 	})
 
-	return token.SignedString([]byte(secretKey))
+	return token.SignedString(getSecretKey())
 }
 
 func VerifyToken(tokenString string) (uint, bool, bool, []uint, error) {
@@ -85,7 +98,7 @@ func VerifyToken(tokenString string) (uint, bool, bool, []uint, error) {
 			return nil, jwt.ErrSignatureInvalid
 		}
 
-		return []byte(secretKey), nil
+		return getSecretKey(), nil
 	})
 	if err != nil {
 		return 0, false, false, nil, errors.New("could not parse token")

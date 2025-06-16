@@ -1,11 +1,10 @@
 package handlers
 
 import (
-	"os"
-
 	"github.com/Sebiche09/app-anti-gaspillage.git/geocoding"
 	"github.com/Sebiche09/app-anti-gaspillage.git/repositories"
 	"github.com/Sebiche09/app-anti-gaspillage.git/services"
+	"github.com/Sebiche09/app-anti-gaspillage.git/utils"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +17,6 @@ type Handlers struct {
 }
 
 func NewHandlers(db *gorm.DB) *Handlers {
-	// Initialisation des repositories existants
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := NewUserHandler(userService)
@@ -32,7 +30,7 @@ func NewHandlers(db *gorm.DB) *Handlers {
 	merchantHandler := NewMerchantHandler(merchantService)
 
 	geocodingConfig := geocoding.Config{
-		APIKey: getEnv("GEOAPIFY_API_KEY", "2115077bfd0b48daa4204a0e9466c4cc"),
+		APIKey: utils.GetEnv("GEOAPIFY_API_KEY"),
 	}
 	geocodingService := geocoding.NewService(geocodingConfig)
 
@@ -40,14 +38,9 @@ func NewHandlers(db *gorm.DB) *Handlers {
 	restaurantService := services.NewRestaurantService(restaurantRepo, merchantRepo, geocodingService)
 	restaurantHandler := NewRestaurantHandler(restaurantService)
 
-	// Initialisation des nouveaux repositories et services pour les invitations
 	invitationRepo := repositories.NewInvitationRepository(db)
 	restaurantStaffRepo := repositories.NewRestaurantStaffRepository(db)
 
-	// Si vous avez un service d'email, vous pouvez l'initialiser ici
-	// emailService := services.NewEmailService(...)
-
-	// Pour l'exemple, créons un service d'email simple qui ne fait rien
 	emailService := services.NewNoopEmailService()
 
 	invitationService := services.NewInvitationService(
@@ -66,12 +59,4 @@ func NewHandlers(db *gorm.DB) *Handlers {
 		Restaurant: restaurantHandler,
 		Invitation: invitationHandler,
 	}
-}
-
-func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
-	}
-	return value
 }

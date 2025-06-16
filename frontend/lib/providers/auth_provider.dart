@@ -1,4 +1,3 @@
-// lib/providers/auth_provider.dart
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../constants/auth_status.dart';
@@ -35,35 +34,40 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<String?> login(String email, String password) async {
     _status = AuthStatus.authenticating;
     _errorMessage = '';
     notifyListeners();
-    
+
     try {
       final loginResponse = await _authService.login(email, password);
+      print("Login response: success=${loginResponse.success},error=${loginResponse.errorMessage}");
 
       if (loginResponse.success) {
         _user = loginResponse.user;
-
-        // Récupérer immédiatement le statut marchand depuis le JWT
         final token = loginResponse.token;
         _isMerchant = _decodeMerchantStatus(token);
 
         _status = AuthStatus.authenticated;
         notifyListeners();
-        return true;
+        return null; 
       } else {
+
         _status = AuthStatus.error;
         _errorMessage = loginResponse.errorMessage ?? 'Identifiants incorrects';
         notifyListeners();
-        return false;
+
+        if (loginResponse.errorMessage == "Please confirm your email before logging in.") {
+          print("Email not confirmed");
+          return "confirm_email";
+        }
+        return "error";
       }
     } catch (e) {
       _status = AuthStatus.error;
       _errorMessage = e.toString();
       notifyListeners();
-      return false;
+      return "error";
     }
   }
 
@@ -100,5 +104,34 @@ class AuthProvider with ChangeNotifier {
     if (token == null) return false;
     final decodedToken = JwtDecoder.decode(token);
     return decodedToken['isMerchant'] ?? false;
+  }
+
+  Future<bool> verifyCode(String email, String code) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = '';
+    notifyListeners();
+
+    final success = await _authService.verifyCode(email, code);
+
+    if (success) {
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return true;
+    } else {
+      _status = AuthStatus.error;
+      _errorMessage = 'Code de vérification incorrect';
+      notifyListeners();
+      return false;
+    }
+  }
+  Future<bool> resendCode(String email) async {
+    try {
+      await _authService.resendVerificationCode(email);
+      return true;
+    } catch (e) {
+      _errorMessage = "Erreur lors de l'envoi du code : $e";
+      notifyListeners();
+      return false;
+    }
   }
 }

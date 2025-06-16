@@ -7,6 +7,13 @@ definitions:
         description: Valid is true if Time is not NULL
         type: boolean
     type: object
+  handlers.CodeValidationRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    type: object
   handlers.ProcessRequestInput:
     properties:
       status:
@@ -245,10 +252,16 @@ definitions:
       is_admin:
         description: Est-ce un administrateur ?
         type: boolean
+      isEmailConfirmed:
+        description: L'email a-t-il été confirmé ?
+        type: boolean
       password_hash:
         description: Hash du mot de passe
         type: string
       updatedAt:
+        type: string
+      validationCode:
+        description: Code de validation pour l'inscription
         type: string
     required:
     - email
@@ -647,6 +660,36 @@ paths:
           schema:
             $ref: '#/definitions/models.User'
       summary: Create a new user
+      tags:
+      - Users
+  /api/auth/validate-code:
+    post:
+      consumes:
+      - application/json
+      description: Valide le code envoyé par email et active le compte
+      parameters:
+      - description: Email et code
+        in: body
+        name: validation
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CodeValidationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Valider le code de confirmation
       tags:
       - Users
   /api/baskets/:

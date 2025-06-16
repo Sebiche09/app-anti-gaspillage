@@ -106,14 +106,14 @@ class AuthService {
 
   LoginResponse _handleFailedLogin(http.Response response) {
     String errorMessage;
-    
+
     try {
       final errorData = json.decode(response.body);
-      errorMessage = errorData['message'] ?? 'Échec de connexion';
+      errorMessage = errorData['error'] ?? errorData['message'] ?? 'Échec de connexion';
     } catch (e) {
       errorMessage = 'Échec de connexion (${response.statusCode})';
     }
-    
+
     return LoginResponse(
       success: false,
       token: null,
@@ -282,5 +282,35 @@ class AuthService {
       _storage.delete(key: _userKey),
     ]);
     print('Déconnexion réussie');
+  }
+  Future<bool> verifyCode(String email, String code) async {
+    final url = '$baseUrl/api/auth/validate-code';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email.trim(),
+          'code': code.trim(),
+        }),
+      ).timeout(_requestTimeout);
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Exception lors de la vérification: $e');
+      return false;
+    }
+  }
+  Future<void> resendVerificationCode(String email) async {
+    final url = '$baseUrl/api/auth/resend-code'; 
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Erreur lors de l\'envoi du code');
+    }
   }
 }

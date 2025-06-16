@@ -4,6 +4,7 @@ import '../../../constants/app_colors.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../constants/auth_status.dart';
 import '../../../ui/screens/main_screen.dart';
+import '../../screens/auth/validation_screen.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -26,31 +27,38 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _login() async {
-  FocusScope.of(context).unfocus();
-  
-  if (_formKey.currentState!.validate()) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.login(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
-    if (!mounted) return;
-    
-    if (success) {
-      // Redirection immédiate selon le statut isMerchant
-      Navigator.pushReplacementNamed(
-        context,
-        authProvider.isMerchant ? '/merchant' : '/home',
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState!.validate()) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final result = await authProvider.login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
-    } else {
-      // Message d'erreur en cas d'échec
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.errorMessage)),
-      );
+      if (!mounted) return;
+
+      if (result == null) {
+        Navigator.pushReplacementNamed(
+          context,
+          authProvider.isMerchant ? '/merchant' : '/home',
+        );
+      } else if (result == "confirm_email") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ValidationScreen(email: _emailController.text.trim()),
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Veuillez valider votre email avant de vous connecter.")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authProvider.errorMessage)),
+        );
+      }
     }
   }
-}
-
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
