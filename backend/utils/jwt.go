@@ -57,13 +57,13 @@ func VerifyInvitationToken(tokenString string) (uint, string, error) {
 	return restaurantID, email, nil
 }
 
+// ---------------------------------------------------------------
 func GenerateUniqueInviteCode() string {
-	b := make([]byte, 6) // 6 octets donneront 12 caractères en hexadécimal
+	b := make([]byte, 6)
 	rand.Read(b)
 	return hex.EncodeToString(b)
 }
 
-// ---------------------------------------------------------------
 func GenerateValidationCode() string {
 	n := 6
 	b := make([]byte, n)

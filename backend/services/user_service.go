@@ -59,35 +59,29 @@ func (s *UserService) Save(user *models.User) error {
 }
 
 func (s *UserService) Login(email string, password string) (string, error) {
-	// Vérifier si l'utilisateur existe
 	user, err := s.UserRepo.FindByEmail(email)
 	if err != nil {
 		return "", errors.New("invalid credentials")
 	}
 
-	// Vérifier si le mot de passe est correct
 	if !utils.CheckPasswordHash(password, user.PasswordHash) {
 		return "", errors.New("invalid credentials")
 	}
 
-	// Vérifier si l'email est confirmé
 	if !user.IsEmailConfirmed {
 		return "", errors.New("email not confirmed")
 	}
 
-	// Vérifier si l'utilisateur est marchand
 	isMerchant, err := s.UserRepo.IsMerchant(user.ID)
 	if err != nil {
 		return "", errors.New("failed to check merchant status")
 	}
 
-	// Récupérer les restaurants où il est staff
 	staffRestaurantIDs, err := s.UserRepo.GetStaffRestaurantIDs(user.ID)
 	if err != nil {
 		return "", errors.New("failed to get staff restaurant IDs")
 	}
 
-	// Générer un token JWT
 	token, err := utils.GenerateToken(user.Email, user.ID, user.IsAdmin, isMerchant, staffRestaurantIDs)
 	if err != nil {
 		return "", errors.New("failed to generate token")

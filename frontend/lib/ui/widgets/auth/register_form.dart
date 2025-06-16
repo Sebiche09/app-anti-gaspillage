@@ -5,17 +5,22 @@ import '../../../providers/auth_provider.dart';
 import '../../../constants/auth_status.dart';
 
 class RegisterForm extends StatefulWidget {
-  const RegisterForm({super.key});
+  final Function(String email)? onRegistrationSuccess;
+
+  const RegisterForm({
+    super.key,
+    this.onRegistrationSuccess,
+  });
 
   @override
   State<RegisterForm> createState() => _RegisterFormState();
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  final _formKey = GlobalKey<FormState>(); 
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true; 
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -34,7 +39,8 @@ class _RegisterFormState extends State<RegisterForm> {
       );
 
       if (success && mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
+        // Appeler le callback avec l'email
+        widget.onRegistrationSuccess?.call(_emailController.text.trim());
       }
     }
   }
@@ -44,111 +50,110 @@ class _RegisterFormState extends State<RegisterForm> {
     final authProvider = Provider.of<AuthProvider>(context);
     final isLoading = authProvider.status == AuthStatus.authenticating;
 
-      return Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            // Champ email
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF5F5F5),
-                hintText: 'Email',
-                prefixIcon: const Icon(Icons.email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          // Champ email
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFF5F5F5),
+              hintText: 'Email',
+              prefixIcon: const Icon(Icons.email),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Veuillez entrer votre email';
-                }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                    .hasMatch(value)) {
-                  return 'Email invalide';
-                }
-                return null;
-              },
             ),
-            const SizedBox(height: 16),
-            // Champ mot de passe
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color(0xFFF5F5F5),
-                hintText: 'Mot de passe',
-                prefixIcon: const Icon(Icons.lock),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Veuillez entrer votre email';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                  .hasMatch(value)) {
+                return 'Email invalide';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          // Champ mot de passe
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFF5F5F5),
+              hintText: 'Mot de passe',
+              prefixIcon: const Icon(Icons.lock),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Veuillez entrer votre mot de passe';
-                }
-                if (value.length < 6) {
-                  return 'Le mot de passe doit contenir au moins 6 caractères';
-                }
-                return null;
-              },
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
-            const SizedBox(height: 24),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Veuillez entrer votre mot de passe';
+              }
+              if (value.length < 6) {
+                return 'Le mot de passe doit contenir au moins 6 caractères';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
 
-            // Bouton d'inscription
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _register,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+          // Bouton d'inscription
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : _register,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'S\'inscrire',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+              ),
+              child: isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'S\'inscrire',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-              ),
+                    ),
             ),
-            const SizedBox(height: 80),
+          ),
+          const SizedBox(height: 80),
 
-            // Message d'erreur
-            if (authProvider.status == AuthStatus.error &&
-                authProvider.errorMessage.isNotEmpty)
-              Text(
-                authProvider.errorMessage,
-                style: const TextStyle(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+          if (authProvider.status == AuthStatus.error &&
+              authProvider.errorMessage.isNotEmpty)
+            Text(
+              authProvider.errorMessage,
+              style: const TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
               ),
-          ],
-        ),
-      );
+              textAlign: TextAlign.center,
+            ),
+        ],
+      ),
+    );
   }
 }

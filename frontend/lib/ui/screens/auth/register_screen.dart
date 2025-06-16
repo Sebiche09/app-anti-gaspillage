@@ -4,7 +4,7 @@ import '../../../constants/app_styles.dart';
 import '../../../constants/app_text.dart';
 import '../../widgets/auth/register_form.dart';
 import '../../widgets/auth/login_link.dart';
-import 'login_screen.dart'; 
+import 'validation_screen.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -36,7 +36,16 @@ class RegisterScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                const RegisterForm(),
+                RegisterForm(
+                  onRegistrationSuccess: (String email) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ValidationScreen(email: email),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -44,10 +53,7 @@ class RegisterScreen extends StatelessWidget {
       ),
       bottomNavigationBar: LoginLink(
         onPressed: () {
-          Navigator.push(
-            context, 
-            MaterialPageRoute(builder: (context) => const LoginScreen()), 
-          );
+          Navigator.pushReplacementNamed(context, '/login'); 
         },
       ),
     );
