@@ -4,7 +4,7 @@ import 'plus_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/merchant_provider.dart';
 import 'merchant/merchant_screen.dart';
-import 'merchant/store_screen.dart';
+import 'merchant/add_store_screen.dart';
 
 class BeMerchantScreen extends StatefulWidget {
   const BeMerchantScreen({super.key});
@@ -86,7 +86,6 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Demande envoyée avec succès')),
         );
-        // Rafraîchir les données après soumission réussie
         _checkExistingApplication();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -200,7 +199,7 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
               ),
             ),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const StoreScreen()),
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const AddStoreScreen()),
               );
             },
             child: const Text('Créer mon magasin'),

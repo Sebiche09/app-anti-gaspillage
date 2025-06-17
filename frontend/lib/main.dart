@@ -22,6 +22,7 @@ import 'services/store_service.dart';
 import 'ui/screens/merchant/store_screen.dart';
 import 'ui/screens/auth/register_screen.dart';
 import 'ui/screens/auth/validation_screen.dart';
+import 'ui/screens/merchant/merchant_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -162,6 +163,7 @@ class _SoveManjeState extends State<SoveManje> {
               routes: {
                 '/login': (context) => const LoginScreen(),
                 '/register': (context) => const RegisterScreen(),
+                '/merchant': (context) => MerchantScreen(),
                 '/home': (context) => const MainScreen(),
                 '/be_merchant': (context) => const BeMerchantScreen(),
                 '/explore': (context) => const ExploreScreen(),
