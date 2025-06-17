@@ -17,7 +17,7 @@ func NewBasketRepository(db *gorm.DB) *BasketRepository {
 
 func (r *BasketRepository) GetAll() ([]models.Basket, error) {
 	var baskets []models.Basket
-	if err := r.DB.Preload("Restaurant").Preload("Restaurant.Category").Find(&baskets).Error; err != nil {
+	if err := r.DB.Preload("Store").Preload("Store.Category").Find(&baskets).Error; err != nil {
 		return nil, err
 	}
 	return baskets, nil
@@ -25,7 +25,7 @@ func (r *BasketRepository) GetAll() ([]models.Basket, error) {
 
 func (r *BasketRepository) GetByID(id int) (*models.Basket, error) {
 	var basket models.Basket
-	if err := r.DB.Preload("Restaurant").Preload("Restaurant.Category").First(&basket, id).Error; err != nil {
+	if err := r.DB.Preload("Store").Preload("Store.Category").First(&basket, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("basket not found")
 		}

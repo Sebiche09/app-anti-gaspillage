@@ -8,17 +8,18 @@ import (
 
 type Invitation struct {
 	gorm.Model
-	RestaurantID uint
-	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
-	SenderID     uint
-	Sender       User   `gorm:"foreignKey:SenderID"`
-	Email        string `gorm:"index"`
-	Code         string `gorm:"index"`
-	Token        string `gorm:"uniqueIndex"`
-	Status       InvitationStatus
-	Role         string
-	ExpiresAt    time.Time
+	StoreID    uint
+	Store      Store `gorm:"foreignKey:StoreID;constraint:OnDelete:CASCADE"`
+	SenderID   uint
+	Sender     User   `gorm:"foreignKey:SenderID"`
+	Email      string `gorm:"index"`
+	Code       string `gorm:"index"`
+	Token      string `gorm:"uniqueIndex"`
+	Status     InvitationStatus
+	ExpiresAt  time.Time  `gorm:"not null"`
+	AcceptedAt *time.Time `gorm:"default:NULL"`
 }
+
 type InvitationStatus string
 
 const (

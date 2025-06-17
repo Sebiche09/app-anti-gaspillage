@@ -9,17 +9,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type RestaurantHandler struct {
-	service *services.RestaurantService
+type StoreHandler struct {
+	service *services.StoreService
 }
 
-func NewRestaurantHandler(service *services.RestaurantService) *RestaurantHandler {
-	return &RestaurantHandler{service: service}
+func NewStoreHandler(service *services.StoreService) *StoreHandler {
+	return &StoreHandler{service: service}
 }
 
 // summary: Récupérer toutes les catégories
-// description: Permet de récupérer la liste de toutes les catégories de restaurants
-// tags: Restaurants
+// description: Permet de récupérer la liste de toutes les catégories de stores
+// tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -28,7 +28,7 @@ func NewRestaurantHandler(service *services.RestaurantService) *RestaurantHandle
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
 // @Router /api/categories [get]
-func (h *RestaurantHandler) GetCategories(c *gin.Context) {
+func (h *StoreHandler) GetCategories(c *gin.Context) {
 	categories, err := h.service.GetCategories()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -38,22 +38,22 @@ func (h *RestaurantHandler) GetCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": categories})
 }
 
-// summary: Créer un restaurant
-// description: Permet à un marchand de créer un restaurant
-// tags: Restaurants
+// summary: Créer un magasin
+// description: Permet à un marchand de créer un magasin
+// tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param Authorization header string true "Bearer token"
-// @Param input body requests.CreateRestaurantRequest true "Données de la demande"
+// @Param input body requests.CreateStoreRequest true "Données de la demande"
 // @Success 201 {object} models.Response
 // @Failure 400 {object} models.ErrorResponse
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 409 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/merchants/restaurants [post]
-func (h *RestaurantHandler) CreateRestaurant(c *gin.Context) {
-	var req requests.CreateRestaurantRequest
+// @Router /api/merchants/stores [post]
+func (h *StoreHandler) CreateStore(c *gin.Context) {
+	var req requests.CreateStoreRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -61,7 +61,7 @@ func (h *RestaurantHandler) CreateRestaurant(c *gin.Context) {
 
 	userID := c.MustGet("userId").(uint)
 
-	if err := h.service.CreateRestaurant(req, userID); err != nil {
+	if err := h.service.CreateStore(req, userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -69,33 +69,33 @@ func (h *RestaurantHandler) CreateRestaurant(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Votre demande a été soumise avec succès"})
 }
 
-// summary: Mise à jour d'un restaurant
-// description: Permet à un marchand de mettre à jour un restaurant
-// tags: Restaurants
+// summary: Mise à jour d'un magasin
+// description: Permet à un marchand de mettre à jour un magasin
+// tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param Authorization header string true "Bearer token"
-// @Param id path int true "Restaurant ID"
-// @Param input body requests.UpdateRestaurantRequest true "Données de la demande"
+// @Param id path int true "Magasin ID"
+// @Param input body requests.UpdateStoreRequest true "Données de la demande"
 // @Success 200 {object} models.Response
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/merchants/restaurants/{id} [put]
-func (h *RestaurantHandler) UpdateRestaurant(c *gin.Context) {
+// @Router /api/merchants/stores/{id} [put]
+func (h *StoreHandler) UpdateStore(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	var req requests.UpdateRestaurantRequest
+	var req requests.UpdateStoreRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.service.UpdateRestaurant(req, uint(id)); err != nil {
+	if err := h.service.UpdateStore(req, uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -103,26 +103,26 @@ func (h *RestaurantHandler) UpdateRestaurant(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Votre demande a été soumise avec succès"})
 }
 
-// summary: supprimer le restaurant d'un marchand
-// description: Permet à un marchand de supprimer un restaurant
-// tags: Restaurants
+// summary: supprimer le magasin d'un marchand
+// description: Permet à un marchand de supprimer un magasin
+// tags: Magasins
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param Authorization header string true "Bearer token"
-// @Param id path int true "Restaurant ID"
+// @Param id path int true "Magasin ID"
 // @Success 200 {object} models.Response
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/merchants/restaurants/{id} [delete]
-func (h *RestaurantHandler) DeleteRestaurant(c *gin.Context) {
+// @Router /api/merchants/magasins/{id} [delete]
+func (h *StoreHandler) DeleteStore(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
-	if err := h.service.DeleteRestaurant(uint(id)); err != nil {
+	if err := h.service.DeleteStore(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -130,9 +130,9 @@ func (h *RestaurantHandler) DeleteRestaurant(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Votre demande a été soumise avec succès"})
 }
 
-// summary: Obtenir les restaurants d'un marchand
-// description: Permet à un marchand de récupérer la liste de ses restaurants
-// tags: Restaurants
+// summary: Obtenir les magasins d'un marchand
+// description: Permet à un marchand de récupérer la liste de ses magasins
+// tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -140,22 +140,22 @@ func (h *RestaurantHandler) DeleteRestaurant(c *gin.Context) {
 // @Success 200 {object} models.Response
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/merchants/restaurants [get]
-func (h *RestaurantHandler) GetRestaurantsMerchant(c *gin.Context) {
+// @Router /api/merchants/stores [get]
+func (h *StoreHandler) GetStoresMerchant(c *gin.Context) {
 	userID := c.MustGet("userId").(uint)
 
-	restaurants, err := h.service.GetRestaurantsMerchant(userID)
+	stores, err := h.service.GetStoresMerchant(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": restaurants})
+	c.JSON(http.StatusOK, gin.H{"data": stores})
 }
 
-// summary: Obtenir les restaurants
-// description: Permet de récupérer la liste de tous les restaurants
-// tags: Restaurants
+// summary: Obtenir les magasins
+// description: Permet de récupérer la liste de tous les magasins
+// tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -163,31 +163,31 @@ func (h *RestaurantHandler) GetRestaurantsMerchant(c *gin.Context) {
 // @Success 200 {object} models.Response
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/restaurants [get]
-func (h *RestaurantHandler) GetRestaurants(c *gin.Context) {
-	restaurants, err := h.service.GetRestaurants()
+// @Router /api/stores [get]
+func (h *StoreHandler) GetStores(c *gin.Context) {
+	stores, err := h.service.GetStores()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": restaurants})
+	c.JSON(http.StatusOK, gin.H{"data": stores})
 }
 
-// summary: Obtenir un restaurant
-// description: Permet de récupérer un restaurant
-// tags: Restaurants
+// summary: Obtenir un magasin
+// description: Permet de récupérer un magasin
+// tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param Authorization header string true "Bearer token"
-// @Param id path int true "ID du restaurant"
+// @Param id path int true "ID du magasin"
 // @Success 200 {object} models.Response
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 404 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/restaurants/{id} [get]
-func (h *RestaurantHandler) GetRestaurant(c *gin.Context) {
+// @Router /api/stores/{id} [get]
+func (h *StoreHandler) GetStore(c *gin.Context) {
 	id := c.Param("id")
 
 	parsedID, err := strconv.ParseUint(id, 10, 32)
@@ -195,13 +195,13 @@ func (h *RestaurantHandler) GetRestaurant(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
-	restaurantID := uint(parsedID)
+	storeID := uint(parsedID)
 
-	restaurant, err := h.service.GetRestaurantByID(restaurantID)
+	store, err := h.service.GetStoreByID(storeID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": restaurant})
+	c.JSON(http.StatusOK, gin.H{"data": store})
 }

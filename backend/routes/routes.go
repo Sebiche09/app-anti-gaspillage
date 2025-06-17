@@ -21,6 +21,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 	{
 		auth := api.Group("/auth")
 		{
+			auth.POST("/refresh-token", h.User.RefreshToken)
 			auth.POST("/resend-code", h.User.ResendCode)
 			auth.POST("/validate-code", h.User.ValidateCode)
 			auth.POST("/signup", h.User.Signup)
@@ -31,23 +32,23 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 	authenticated := api.Group("")
 	authenticated.Use(middlewares.Authenticate)
 	{
-		authenticated.GET("/categories", h.Restaurant.GetCategories)
-		restaurants := authenticated.Group("/restaurants")
+		authenticated.GET("/categories", h.Store.GetCategories)
+		stores := authenticated.Group("/stores")
 		{
-			restaurants.GET("/", h.Restaurant.GetRestaurants)
-			restaurants.GET("/:id", h.Restaurant.GetRestaurant)
+			stores.GET("/", h.Store.GetStores)
+			stores.GET("/:id", h.Store.GetStore)
 
-			// Route pour obtenir les invitations en attente d'un restaurant
-			restaurants.GET("/:id/request-status-statustions", h.Invitation.GetPendingInvitations)
+			// Route pour obtenir les invitations en attente d'un magasin
+			stores.GET("/:id/request-status-statustions", h.Invitation.GetPendingInvitations)
 		}
 
 		merchants := authenticated.Group("/merchants")
 		{
 			merchants.POST("/", h.Merchant.CreateMerchantRequest)
 			merchants.GET("/request-status", h.Merchant.MerchantRequestStatus)
-			merchants.GET("/restaurants", h.Restaurant.GetRestaurantsMerchant)
-			merchants.PUT("/restaurants/:id", h.Restaurant.UpdateRestaurant)
-			merchants.POST("/restaurants", h.Restaurant.CreateRestaurant)
+			merchants.GET("/stores", h.Store.GetStoresMerchant)
+			merchants.PUT("/stores/:id", h.Store.UpdateStore)
+			merchants.POST("/stores", h.Store.CreateStore)
 		}
 
 		merchants.Use(middlewares.RequireMerchantWithSync(db))
@@ -81,9 +82,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 			baskets.GET("/", h.Basket.GetBaskets)
 			baskets.GET("/:id", h.Basket.GetBasket)
 
-			// Routes pour la gestion des paniers (staff du restaurant uniquement)
+			// Routes pour la gestion des paniers (staff du magasin uniquement)
 			staffBaskets := baskets.Group("")
-			staffBaskets.Use(middlewares.RequireRestaurantStaff())
+			staffBaskets.Use(middlewares.RequireStoreStaff())
 			{
 				staffBaskets.POST("/", h.Basket.CreateBasket)
 				staffBaskets.PUT("/:id", h.Basket.UpdateBasket)

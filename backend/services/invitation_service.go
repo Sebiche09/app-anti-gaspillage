@@ -16,22 +16,22 @@ type EmailService interface {
 
 type InvitationService struct {
 	invitationRepo *repositories.InvitationRepository
-	restaurantRepo *repositories.RestaurantRepository
+	storeRepo      *repositories.StoreRepository
 	merchantRepo   *repositories.MerchantRepository
-	staffRepo      *repositories.RestaurantStaffRepository
+	staffRepo      *repositories.StoreStaffRepository
 	emailService   EmailService
 }
 
 func NewInvitationService(
 	invitationRepo *repositories.InvitationRepository,
-	restaurantRepo *repositories.RestaurantRepository,
+	storeRepo *repositories.StoreRepository,
 	merchantRepo *repositories.MerchantRepository,
-	staffRepo *repositories.RestaurantStaffRepository,
+	staffRepo *repositories.StoreStaffRepository,
 	emailService EmailService,
 ) *InvitationService {
 	return &InvitationService{
 		invitationRepo: invitationRepo,
-		restaurantRepo: restaurantRepo,
+		storeRepo:      storeRepo,
 		merchantRepo:   merchantRepo,
 		staffRepo:      staffRepo,
 		emailService:   emailService,
@@ -45,16 +45,16 @@ func generateInviteCode() string {
 	return hex.EncodeToString(b)
 }
 
-func (s *InvitationService) CreateInvitation(senderID, restaurantID uint, email string) (*models.Invitation, error) {
-	// Vérifier si le sender est autorisé pour ce restaurant
-	restaurant, err := s.restaurantRepo.GetRestaurantByID(restaurantID)
+func (s *InvitationService) CreateInvitation(senderID, storeID uint, email string) (*models.Invitation, error) {
+	// Vérifier si le sender est autorisé pour ce magasin
+	store, err := s.storeRepo.GetStoreByID(storeID)
 	if err != nil {
 		return nil, err
 	}
 
 	merchant, err := s.merchantRepo.FindMerchantByUserID(senderID)
-	if err != nil || restaurant.MerchantID != merchant.ID {
-		return nil, errors.New("unauthorized: you don't own this restaurant")
+	if err != nil || store.MerchantID != merchant.ID {
+		return nil, errors.New("unauthorized: you don't own this store")
 	}
 
 	// Générer le code unique
@@ -62,12 +62,12 @@ func (s *InvitationService) CreateInvitation(senderID, restaurantID uint, email 
 
 	// Créer l'invitation
 	invitation := &models.Invitation{
-		RestaurantID: restaurantID,
-		SenderID:     senderID,
-		Email:        email,
-		Code:         code,
-		Status:       models.InvitationPending,
-		ExpiresAt:    time.Now().Add(7 * 24 * time.Hour), // 7 jours
+		StoreID:   storeID,
+		SenderID:  senderID,
+		Email:     email,
+		Code:      code,
+		Status:    models.InvitationPending,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour), // 7 jours
 	}
 
 	if err := s.invitationRepo.CreateInvitation(invitation); err != nil {
@@ -102,15 +102,15 @@ func (s *InvitationService) AcceptInvitation(code string, userID uint) error {
 	}
 
 	// Vérifier que l'utilisateur n'est pas déjà membre du staff
-	isMember, _ := s.staffRepo.IsUserStaffMember(invitation.RestaurantID, userID)
+	isMember, _ := s.staffRepo.IsUserStaffMember(invitation.StoreID, userID)
 	if isMember {
-		return errors.New("you are already a staff member of this restaurant")
+		return errors.New("you are already a staff member of this store")
 	}
 
 	// Ajouter l'utilisateur au staff
-	staff := &models.RestaurantStaff{
-		RestaurantID: invitation.RestaurantID,
-		UserID:       userID,
+	staff := &models.StoreStaff{
+		StoreID: invitation.StoreID,
+		UserID:  userID,
 	}
 
 	if err := s.staffRepo.AddStaffMember(staff); err != nil {
@@ -122,23 +122,23 @@ func (s *InvitationService) AcceptInvitation(code string, userID uint) error {
 	return s.invitationRepo.UpdateInvitation(invitation)
 }
 
-func (s *InvitationService) GetPendingInvitations(restaurantID uint, userID uint) ([]models.Invitation, error) {
-	// Vérifier que l'utilisateur est autorisé à voir les invitations de ce restaurant
+func (s *InvitationService) GetPendingInvitations(storeID uint, userID uint) ([]models.Invitation, error) {
+	// Vérifier que l'utilisateur est autorisé à voir les invitations de ce magasin
 	merchant, err := s.merchantRepo.FindMerchantByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	restaurant, err := s.restaurantRepo.GetRestaurantByID(restaurantID)
+	store, err := s.storeRepo.GetStoreByID(storeID)
 	if err != nil {
 		return nil, err
 	}
 
-	if restaurant.MerchantID != merchant.ID {
-		return nil, errors.New("unauthorized: you don't have access to this restaurant")
+	if store.MerchantID != merchant.ID {
+		return nil, errors.New("unauthorized: you don't have access to this store")
 	}
 
-	return s.invitationRepo.GetPendingInvitationsByRestaurant(restaurantID)
+	return s.invitationRepo.GetPendingInvitationsByStore(storeID)
 }
 
 func (s *InvitationService) CancelInvitation(invitationID, userID uint) error {

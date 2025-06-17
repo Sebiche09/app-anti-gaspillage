@@ -12,7 +12,7 @@ type Handlers struct {
 	User       *UserHandler
 	Basket     *BasketHandler
 	Merchant   *MerchantHandler
-	Restaurant *RestaurantHandler
+	Store      *StoreHandler
 	Invitation *InvitationHandler
 }
 
@@ -34,20 +34,20 @@ func NewHandlers(db *gorm.DB) *Handlers {
 	}
 	geocodingService := geocoding.NewService(geocodingConfig)
 
-	restaurantRepo := repositories.NewRestaurantRepository(db)
-	restaurantService := services.NewRestaurantService(restaurantRepo, merchantRepo, geocodingService)
-	restaurantHandler := NewRestaurantHandler(restaurantService)
+	storeRepo := repositories.NewStoreRepository(db)
+	storeService := services.NewStoreService(storeRepo, merchantRepo, geocodingService)
+	storeHandler := NewStoreHandler(storeService)
 
 	invitationRepo := repositories.NewInvitationRepository(db)
-	restaurantStaffRepo := repositories.NewRestaurantStaffRepository(db)
+	storeStaffRepo := repositories.NewStoreStaffRepository(db)
 
 	emailService := services.NewNoopEmailService()
 
 	invitationService := services.NewInvitationService(
 		invitationRepo,
-		restaurantRepo,
+		storeRepo,
 		merchantRepo,
-		restaurantStaffRepo,
+		storeStaffRepo,
 		emailService,
 	)
 	invitationHandler := NewInvitationHandler(invitationService)
@@ -56,7 +56,7 @@ func NewHandlers(db *gorm.DB) *Handlers {
 		User:       userHandler,
 		Basket:     basketHandler,
 		Merchant:   merchantHandler,
-		Restaurant: restaurantHandler,
+		Store:      storeHandler,
 		Invitation: invitationHandler,
 	}
 }

@@ -1,26 +1,26 @@
 import 'package:flutter/foundation.dart';
-import '../models/restaurantCategory.dart';
-import '../services/restaurant_service.dart';
+import '../models/storeCategory.dart';
+import '../services/store_service.dart';
 
-class RestaurantProvider with ChangeNotifier {
-  final RestaurantService _restaurantService;
+class StoreProvider with ChangeNotifier {
+  final StoreService _storeService;
   bool _isLoading = false;
   String? _errorMessage;
-  List<RestaurantCategory> _categories = [];
+  List<StoreCategory> _categories = [];
   
-  RestaurantProvider({required RestaurantService restaurantService}) 
-      : _restaurantService = restaurantService;
+  StoreProvider({required StoreService storeService}) 
+      : _storeService = storeService;
   
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  List<RestaurantCategory> get categories => _categories;
+  List<StoreCategory> get categories => _categories;
   
-  Future<List<RestaurantCategory>> getCategories() async {
+  Future<List<StoreCategory>> getCategories() async {
     try {
       _setLoading(true);
       _clearError();
       
-      final categories = await _restaurantService.getCategories();
+      final categories = await _storeService.getCategories();
       print("Categories récupérées: $categories");
       _categories = categories;
       notifyListeners();
@@ -33,7 +33,7 @@ class RestaurantProvider with ChangeNotifier {
     }
   }
   
-  Future<bool> createRestaurant({
+  Future<bool> createStore({
     required String name,
     required String address,
     required String city,
@@ -45,7 +45,7 @@ class RestaurantProvider with ChangeNotifier {
       _setLoading(true);
       _clearError();
       
-      final result = await _restaurantService.createRestaurant(
+      final result = await _storeService.createStore(
         name: name,
         address: address,
         city: city,

@@ -16,3 +16,6 @@ type CodeValidationRequest struct {
 	Email string `json:"email"`
 	Code  string `json:"code"`
 }
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}

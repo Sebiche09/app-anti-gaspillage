@@ -18,14 +18,20 @@ func Init() *gorm.DB {
 	// Auto-migrations
 	db.AutoMigrate(
 		&models.Basket{},
+		&models.BasketStatus{},
+		&models.BasketConfiguration{},
 		&models.User{},
 		&models.Merchant{},
 		&models.MerchantRequest{},
-		&models.Notification{},
-		&models.Restaurant{},
-		&models.RestaurantStaff{},
-		&models.Invitation{},
+		&models.Store{},
+		&models.StoreStaff{},
+		&models.StoreCategory{},
 		&models.Category{},
+		&models.StoreFavorite{},
+		&models.StripeCustomer{},
+		&models.Order{},
+
+		&models.Invitation{},
 	)
 	initDefaultCategories(db)
 	return db

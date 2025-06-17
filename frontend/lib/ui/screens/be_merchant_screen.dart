@@ -4,7 +4,7 @@ import 'plus_screen.dart';
 import 'package:provider/provider.dart';
 import '../../providers/merchant_provider.dart';
 import 'merchant/merchant_screen.dart';
-import 'merchant/restaurant_screen.dart';
+import 'merchant/store_screen.dart';
 
 class BeMerchantScreen extends StatefulWidget {
   const BeMerchantScreen({super.key});
@@ -200,10 +200,10 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
               ),
             ),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const RestaurantScreen()),
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const StoreScreen()),
               );
             },
-            child: const Text('Créer mon restaurant'),
+            child: const Text('Créer mon magasin'),
           ),
       ],
     );
@@ -241,7 +241,7 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
       case MerchantApplicationStatus.pending:
         return 'Votre demande est en cours d\'examen. Nous vous contacterons prochainement.';
       case MerchantApplicationStatus.approved:
-        return 'Félicitations! Votre demande a été approuvée. Vous pouvez maintenant créer votre restaurant.';
+        return 'Félicitations! Votre demande a été approuvée. Vous pouvez maintenant créer votre magasin.';
       case MerchantApplicationStatus.rejected:
         return 'Votre demande a été refusée. Veuillez vérifier les informations fournies ou nous contacter pour plus de détails.';
       default:
