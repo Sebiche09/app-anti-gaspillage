@@ -96,3 +96,76 @@ func (s *StoreService) DeleteStore(id uint) error {
 
 	return s.storeRepo.DeleteStore(store)
 }
+func (s *StoreService) GetStoreStaff(id uint) ([]models.StoreStaff, error) {
+	store, err := s.storeRepo.GetStoreByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	staff, err := s.storeRepo.GetStoreStaff(store.ID)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de la récupération du personnel du magasin: %w", err)
+	}
+
+	return staff, nil
+}
+func (s *StoreService) GetStoreBasketConfig(id uint) (*models.BasketConfiguration, error) {
+	store, err := s.storeRepo.GetStoreByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := s.storeRepo.GetStoreBasketConfig(store.ID)
+	if err != nil {
+		return nil, fmt.Errorf("erreur lors de la récupération de la configuration du panier du magasin: %w", err)
+	}
+
+	return config, nil
+}
+func (s *StoreService) CreateStoreBasketConfig(req requests.CreateBasketConfigurationRequest, id uint) error {
+	store, err := s.storeRepo.GetStoreByID(id)
+	if err != nil {
+		return err
+	}
+
+	config := &models.BasketConfiguration{
+		Name:               req.Name,
+		Description:        req.Description,
+		DiscountPercentage: req.DiscountPercentage,
+		Quantity:           req.Quantity,
+		StoreID:            store.ID,
+	}
+
+	return s.storeRepo.CreateStoreBasketConfig(config)
+}
+func (s *StoreService) UpdateStoreBasketConfig(req requests.UpdateBasketConfigurationRequest, id uint) error {
+	store, err := s.storeRepo.GetStoreByID(id)
+	if err != nil {
+		return err
+	}
+
+	config, err := s.storeRepo.GetStoreBasketConfig(store.ID)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la récupération de la configuration du panier du magasin: %w", err)
+	}
+
+	config.Name = req.Name
+	config.Description = req.Description
+	config.DiscountPercentage = req.DiscountPercentage
+	config.Quantity = req.Quantity
+
+	return s.storeRepo.UpdateStoreBasketConfig(config)
+}
+func (s *StoreService) DeleteStoreBasketConfig(id uint) error {
+	store, err := s.storeRepo.GetStoreByID(id)
+	if err != nil {
+		return err
+	}
+
+	config, err := s.storeRepo.GetStoreBasketConfig(store.ID)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la récupération de la configuration du panier du magasin: %w", err)
+	}
+
+	return s.storeRepo.DeleteStoreBasketConfig(config)
+}
