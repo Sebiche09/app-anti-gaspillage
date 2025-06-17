@@ -190,7 +190,7 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                '\$${widget.basket.originalPrice.toStringAsFixed(1)}',
+                                '\$${(widget.basket.originalPrice ?? 0).toStringAsFixed(1)}',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   decoration: TextDecoration.lineThrough,

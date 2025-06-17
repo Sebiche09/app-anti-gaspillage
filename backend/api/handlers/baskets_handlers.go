@@ -125,7 +125,7 @@ func (h *BasketHandler) CreateBasket(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, err)
+	c.JSON(http.StatusCreated, gin.H{"message": "Basket created successfully"})
 }
 
 // UpdateBasket godoc
@@ -202,4 +202,49 @@ func (h *BasketHandler) DeleteBasket(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+// GetBasketsByStore godoc
+// @Summary Get baskets by store
+// @Description Retrieve all baskets for a specific store
+// @Tags Baskets
+// @Accept  json
+// @Produce  json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param store_id path int true "Store ID"
+// @Success 200 {array} responses.BasketResponse
+// @Failure 400 {object} map[string]string "Invalid store ID"
+// @Failure 404 {object} map[string]string "Store not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /api/stores/{store_id}/baskets [get]
+func (h *BasketHandler) GetBasketsByStore(c *gin.Context) {
+	storeId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid store ID"})
+		return
+	}
+
+	baskets, err := h.BasketService.GetBasketsByStore(storeId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	var response []responses.BasketByStoreResponse
+
+	for _, basket := range baskets {
+		basketByStoreResponse := responses.BasketByStoreResponse{
+			ID:                 basket.ID,
+			Name:               basket.Name,
+			OriginalPrice:      basket.OriginalPrice,
+			DiscountPercentage: basket.DiscountPercentage,
+			Category:           basket.Store.Category.Name,
+			Description:        basket.Description,
+			Quantity:           basket.Quantity,
+		}
+		response = append(response, basketByStoreResponse)
+	}
+
+	c.JSON(http.StatusOK, response)
 }

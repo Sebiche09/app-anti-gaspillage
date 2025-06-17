@@ -19,7 +19,6 @@ class MerchantProvider with ChangeNotifier {
   MerchantProvider({required MerchantService merchantService}) 
       : _merchantService = merchantService;
 
-  // Getters
   MerchantApplicationStatus get status => _status;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
@@ -35,8 +34,7 @@ class MerchantProvider with ChangeNotifier {
       final result = await _merchantService.checkMerchantStatus();
       print("Result from API: $result");
       
-      // Si vous recevez directement la réponse sans wrapper
-      _merchantData = result; // Stocker toutes les données reçues
+      _merchantData = result; 
       
       // Déterminer le statut
       if (result != null && result.containsKey('status') && result['status'] != null) {

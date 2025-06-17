@@ -35,7 +35,13 @@ func (r *BasketRepository) GetByID(id int) (*models.Basket, error) {
 }
 
 func (r *BasketRepository) Create(basket *models.Basket) error {
-	return r.DB.Create(basket).Error
+	if basket == nil {
+		return errors.New("basket cannot be nil")
+	}
+	if err := r.DB.Create(basket).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *BasketRepository) Delete(basket *models.Basket) error {

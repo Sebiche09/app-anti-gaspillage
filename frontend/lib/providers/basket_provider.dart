@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/basket.dart';
+import '../models/merchant_basket.dart'; // Ajoute cette ligne
 import '../services/basket_service.dart';
 
 class BasketsProvider with ChangeNotifier {
   BasketService _basketService;
   List<Basket> _baskets = [];
+  List<MerchantBasket> _merchantBaskets = []; // Ajoute cette ligne
   List<Basket> _filteredBaskets = [];
   bool _isLoading = false;
   String _error = '';
@@ -14,6 +16,7 @@ class BasketsProvider with ChangeNotifier {
   BasketsProvider(this._basketService);
 
   List<Basket> get baskets => _baskets;
+  List<MerchantBasket> get merchantBaskets => _merchantBaskets; // Ajoute cette ligne
   bool get isLoading => _isLoading;
   String get error => _error;
 
@@ -55,7 +58,7 @@ class BasketsProvider with ChangeNotifier {
     }
 
     List<Basket> categoryFiltered = _baskets.where((basket) =>
-    basket.category.toLowerCase() == category.toLowerCase()
+    (basket.category ?? '').toLowerCase() == category.toLowerCase()
     ).toList();
 
     if (_searchQuery.isNotEmpty) {
@@ -72,8 +75,7 @@ class BasketsProvider with ChangeNotifier {
       _filteredBaskets = _baskets;
     } else {
       _filteredBaskets = _baskets.where((basket) =>
-      basket.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          basket.address.toLowerCase().contains(_searchQuery.toLowerCase())
+        basket.name.toLowerCase().contains(_searchQuery.toLowerCase())
       ).toList();
     }
   }
@@ -81,6 +83,7 @@ class BasketsProvider with ChangeNotifier {
   void debugState() {
     print('BasketsProvider - État actuel:');
     print('Nombre total de paniers: ${_baskets.length}');
+    print('Nombre de paniers marchands: ${_merchantBaskets.length}'); // Ajoute cette ligne
     print('Paniers filtrés: ${_filteredBaskets.length}');
     print('Requête de recherche: "$_searchQuery"');
     print('Catégorie actuelle: "$_currentCategory"');
@@ -93,5 +96,57 @@ class BasketsProvider with ChangeNotifier {
     _currentCategory = '';
     _applyFilters();
     notifyListeners();
+  }
+
+  // Modifie cette méthode
+  Future<void> fetchBasketsForStore(int storeId) async {
+    _isLoading = true;
+    _error = '';
+    notifyListeners();
+
+    try {
+      _merchantBaskets = await _basketService.getBasketsByStore(storeId);
+      _isLoading = false;
+      debugState();
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> addBasket({
+    required String name,
+    required double originalPrice,
+    required double discountPercentage,
+    required int storeId,
+    required int quantity,
+    required String category,
+    required String description,
+    
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _basketService.createBasket(
+        name: name,
+        originalPrice: originalPrice,
+        discountPercentage: discountPercentage,
+        storeId: storeId,
+        quantity: quantity,
+        category: category,
+        description: description,
+      );
+
+      await fetchBasketsForStore(storeId);
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
   }
 }
