@@ -20,7 +20,7 @@ func Authenticate(c *gin.Context) {
 		return
 	}
 
-	userId, isAdmin, isMerchant, staffRestaurantIDs, err := utils.VerifyToken(token)
+	userId, isAdmin, isMerchant, staffStoreIDs, err := utils.VerifyToken(token)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
@@ -28,7 +28,7 @@ func Authenticate(c *gin.Context) {
 	c.Set("userId", userId)
 	c.Set("isAdmin", isAdmin)
 	c.Set("isMerchant", isMerchant)
-	c.Set("staffRestaurantIDs", staffRestaurantIDs)
+	c.Set("staffStoreIDs", staffStoreIDs)
 	c.Next()
 }
 
@@ -44,24 +44,24 @@ func RequireAdmin() gin.HandlerFunc {
 	}
 }
 
-func RequireRestaurantStaff() gin.HandlerFunc {
+func RequireStoreStaff() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var restaurantID uint
+		var storeID uint
 
 		// Pour DELETE: vérifier le paramètre de requête
 		if c.Request.Method == "DELETE" {
-			restaurantIDStr := c.Query("restaurant_id")
-			if restaurantIDStr != "" {
-				parsedID, err := strconv.ParseUint(restaurantIDStr, 10, 32)
+			storeIDStr := c.Query("store_id")
+			if storeIDStr != "" {
+				parsedID, err := strconv.ParseUint(storeIDStr, 10, 32)
 				if err == nil {
-					restaurantID = uint(parsedID)
+					storeID = uint(parsedID)
 				}
 			}
 		} else {
 
 			// Pour POST/PUT: vérifier le corps de la requête
 			var requestBody struct {
-				RestaurantID uint `json:"restaurant_id"`
+				StoreID uint `json:"store_id"`
 			}
 
 			if c.Request.ContentLength > 0 {
@@ -70,45 +70,45 @@ func RequireRestaurantStaff() gin.HandlerFunc {
 				c.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 
 				if err := c.ShouldBindJSON(&requestBody); err == nil {
-					restaurantID = requestBody.RestaurantID
+					storeID = requestBody.StoreID
 				}
 
 				c.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 			}
 		}
 
-		if restaurantID == 0 {
+		if storeID == 0 {
 			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error": "Restaurant ID is required",
+				"error": "Store ID is required",
 			})
 			return
 		}
 
-		if !IsStaffOfRestaurant(c, restaurantID) {
+		if !IsStaffOfStore(c, storeID) {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error": "You are not authorized to manage this restaurant",
+				"error": "You are not authorized to manage this store",
 			})
 			return
 		}
 
-		c.Set("restaurantId", restaurantID)
+		c.Set("storeId", storeID)
 		c.Next()
 	}
 }
 
-func IsStaffOfRestaurant(c *gin.Context, restaurantID uint) bool {
-	staffRestaurantIDsAny, exists := c.Get("staffRestaurantIDs")
+func IsStaffOfStore(c *gin.Context, storeID uint) bool {
+	staffStoreIDsAny, exists := c.Get("staffStoreIDs")
 	if !exists {
 		return false
 	}
 
-	staffRestaurantIDs, ok := staffRestaurantIDsAny.([]uint)
+	staffStoreIDs, ok := staffStoreIDsAny.([]uint)
 	if !ok {
 		return false
 	}
 
-	for _, id := range staffRestaurantIDs {
-		if id == restaurantID {
+	for _, id := range staffStoreIDs {
+		if id == storeID {
 			return true
 		}
 	}

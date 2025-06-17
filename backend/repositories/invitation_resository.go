@@ -36,9 +36,9 @@ func (r *InvitationRepository) GetInvitationByID(id uint) (*models.Invitation, e
 	return &invitation, nil
 }
 
-func (r *InvitationRepository) GetPendingInvitationsByRestaurant(restaurantID uint) ([]models.Invitation, error) {
+func (r *InvitationRepository) GetPendingInvitationsByStore(storeID uint) ([]models.Invitation, error) {
 	var invitations []models.Invitation
-	err := r.db.Where("restaurant_id = ? AND status = ?", restaurantID, models.InvitationPending).Find(&invitations).Error
+	err := r.db.Where("store_id = ? AND status = ?", storeID, models.InvitationPending).Find(&invitations).Error
 	return invitations, err
 }
 

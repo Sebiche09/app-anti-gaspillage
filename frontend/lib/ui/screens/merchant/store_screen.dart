@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
-import '../../../models/restaurantCategory.dart'; 
-import '../../../providers/restaurant_provider.dart';
+import '../../../models/storeCategory.dart'; 
+import '../../../providers/store_provider.dart';
 
-class RestaurantScreen extends StatefulWidget {
-  const RestaurantScreen({Key? key}) : super(key: key);
+class StoreScreen extends StatefulWidget {
+  const StoreScreen({Key? key}) : super(key: key);
 
   @override
-  _RestaurantScreenState createState() => _RestaurantScreenState();
+  _StoreScreenState createState() => _StoreScreenState();
 }
 
-class _RestaurantScreenState extends State<RestaurantScreen> {
+class _StoreScreenState extends State<StoreScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
@@ -21,12 +21,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
   
   int? _selectedCategoryId;
   bool _isLoading = false;
-  List<RestaurantCategory> _categories = [];
+  List<StoreCategory> _categories = [];
 
   @override
   void initState() {
     super.initState();
-    print("Initialisation de RestaurantScreen");
+    print("Initialisation de StoreScreen");
     // Ne pas appeler Provider dans initState directement
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCategories();
@@ -37,7 +37,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     print("Début du chargement des catégories");
     setState(() => _isLoading = true);
     try {
-      final categories = await Provider.of<RestaurantProvider>(context, listen: false).getCategories();
+      final categories = await Provider.of<StoreProvider>(context, listen: false).getCategories();
       print("Catégories chargées: ${categories.length}");
       for (var cat in categories) {
         print("Catégorie: ${cat.id} - ${cat.name}");
@@ -79,7 +79,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       setState(() => _isLoading = true);
 
       try {
-        final success = await Provider.of<RestaurantProvider>(context, listen: false).createRestaurant(
+        final success = await Provider.of<StoreProvider>(context, listen: false).createStore(
           name: _nameController.text,
           address: _addressController.text,
           city: _cityController.text,
@@ -92,12 +92,12 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Restaurant créé avec succès')),
+            const SnackBar(content: Text('Store créé avec succès')),
           );
           Navigator.of(context).pop(); 
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erreur lors de la création du restaurant')),
+            const SnackBar(content: Text('Erreur lors de la création du magasin')),
           );
         }
       } catch (e) {
@@ -111,10 +111,10 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("Construction du widget RestaurantScreen, isLoading: $_isLoading, catégories: ${_categories.length}");
+    print("Construction du widget StoreScreen, isLoading: $_isLoading, catégories: ${_categories.length}");
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ajouter un restaurant'),
+        title: const Text('Ajouter un magasin'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -156,7 +156,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Informations du restaurant',
+          'Informations du magasin',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -165,7 +165,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Veuillez remplir les informations ci-dessous pour ajouter votre restaurant.',
+          'Veuillez remplir les informations ci-dessous pour ajouter votre magasin.',
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[600],
@@ -179,15 +179,15 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     return TextFormField(
       controller: _nameController,
       decoration: InputDecoration(
-        labelText: 'Nom du restaurant',
+        labelText: 'Nom du magasin',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        prefixIcon: const Icon(Icons.restaurant),
+        prefixIcon: const Icon(Icons.store),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Veuillez entrer le nom du restaurant';
+          return 'Veuillez entrer le nom du magasin';
         }
         return null;
       },
@@ -206,7 +206,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Veuillez entrer l\'adresse du restaurant';
+          return 'Veuillez entrer l\'adresse du magasin';
         }
         return null;
       },
@@ -266,7 +266,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
     );
   }
 
-  Widget _buildCategoryDropdown(List<RestaurantCategory> categories) {
+  Widget _buildCategoryDropdown(List<StoreCategory> categories) {
     print("Construction du dropdown avec ${categories.length} catégories");
     
     if (categories.isEmpty) {
@@ -330,7 +330,7 @@ class _RestaurantScreenState extends State<RestaurantScreen> {
       child: _isLoading
         ? const CircularProgressIndicator(color: Colors.white)
         : const Text(
-            'Ajouter le restaurant',
+            'Ajouter le magasin',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
     );

@@ -17,9 +17,11 @@ import 'ui/screens/main_screen.dart';
 import 'ui/screens/be_merchant_screen.dart';
 import 'providers/merchant_provider.dart';
 import 'services/merchant_service.dart';
-import 'providers/restaurant_provider.dart';
-import 'services/restaurant_service.dart';
-import 'ui/screens/merchant/restaurant_screen.dart';
+import 'providers/store_provider.dart';
+import 'services/store_service.dart';
+import 'ui/screens/merchant/store_screen.dart';
+import 'ui/screens/auth/register_screen.dart';
+import 'ui/screens/auth/validation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +29,8 @@ void main() async {
   final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
   final authService = AuthService(baseUrl: ApiConfig.baseUrl);
   final merchantService = MerchantService(apiService: apiService);
-
+  final basketService = BasketService(apiService: apiService);
+  final storeService = StoreService(apiService: apiService);
   runApp(
     DevicePreview(
       enabled: true,
@@ -37,18 +40,13 @@ void main() async {
             create: (_) => AuthProvider(authService),
           ),
           ChangeNotifierProvider<BasketsProvider>(
-            create: (_) => BasketsProvider(
-              BasketService(apiService: apiService),
-            ),
+            create: (_) => BasketsProvider(basketService),
           ),
           ChangeNotifierProvider<MerchantProvider>(
             create: (_) => MerchantProvider(merchantService: merchantService),
           ),
-          // Ajoutez ce provider
-          ChangeNotifierProvider<RestaurantProvider>(
-            create: (_) => RestaurantProvider(
-              restaurantService: RestaurantService(apiService: apiService),
-            ),
+          ChangeNotifierProvider<StoreProvider>(
+            create: (_) => StoreProvider(storeService: storeService),
           ),
         ],
         child: const LoadingApp(),
@@ -57,22 +55,26 @@ void main() async {
   );
 }
 
+//Ce widget sert de point d'entrée pour l'application
 class LoadingApp extends StatefulWidget {
-  const LoadingApp({super.key});
 
+  const LoadingApp({super.key});
   @override
   _LoadingAppState createState() => _LoadingAppState();
 }
 
+//Ce widget gère le chargement des ressources nécessaires avant de lancer l'application principale
 class _LoadingAppState extends State<LoadingApp> {
   bool isLoaded = false;
 
+  // Cette méthode est appelée lors de l'initialisation de l'état du widget
   @override
   void initState() {
     super.initState();
     _loadResources();
   }
 
+  // Cette méthode charge les ressources nécessaires, comme la localisation
   Future<void> _loadResources() async {
     await HomeHeader.loadLocation();
     setState(() {
@@ -80,6 +82,7 @@ class _LoadingAppState extends State<LoadingApp> {
     });
   }
 
+  // Cette méthode construit l'interface utilisateur du widget
   @override
   Widget build(BuildContext context) {
     if (!isLoaded) {
@@ -87,26 +90,29 @@ class _LoadingAppState extends State<LoadingApp> {
         home: LoadingScreen(),
       );
     }
-    return const MyApp();
+    return const SoveManje();
   }
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+// Ce widget est le point d'entrée principal de l'application
+class SoveManje extends StatefulWidget {
+  const SoveManje({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<SoveManje> createState() => _SoveManjeState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _SoveManjeState extends State<SoveManje> {
   late Future<void> _initFuture;
 
+  // Cette méthode est appelée lors de l'initialisation de l'état du widget
   @override
   void initState() {
     super.initState();
     _initFuture = Provider.of<AuthProvider>(context, listen: false).initialize();
   }
 
+  // Cette méthode est appelée pour construire l'interface utilisateur du widget
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
@@ -140,15 +146,20 @@ class _MyAppState extends State<MyApp> {
               ),
               home: authProvider.status == AuthStatus.authenticated
                   ? (authProvider.isMerchant
-                      ? const BeMerchantScreen()  // Écran marchand
-                      : const MainScreen())     // Écran classique
-                  : const LoginScreen(),         // Écran de connexion
+                      ? const BeMerchantScreen()  
+                      : const MainScreen())     
+                  : const LoginScreen(),       
               routes: {
                 '/login': (context) => const LoginScreen(),
+                '/register': (context) => const RegisterScreen(),
                 '/home': (context) => const MainScreen(),
                 '/be_merchant': (context) => const BeMerchantScreen(),
                 '/explore': (context) => const ExploreScreen(),
-                '/add_restaurant': (context) => const RestaurantScreen(),
+                '/add_store': (context) => const StoreScreen(),
+                '/validation': (context) {
+                  final email = ModalRoute.of(context)!.settings.arguments as String;
+                  return ValidationScreen(email: email);
+                },
               },
             );
           },

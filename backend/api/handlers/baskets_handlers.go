@@ -42,16 +42,15 @@ func (h *BasketHandler) GetBaskets(c *gin.Context) {
 
 	for _, basket := range baskets {
 		basketResponse := responses.BasketResponse{
-			ID:            strconv.Itoa(int(basket.ID)),
-			Name:          basket.Name,
-			Latitude:      basket.Restaurant.Latitude,
-			Longitude:     basket.Restaurant.Longitude,
-			Address:       basket.Restaurant.Address,
-			Rating:        basket.Restaurant.Rating,
-			OriginalPrice: basket.OriginalPrice,
-			DiscountPrice: basket.Price,
-			TypeBasket:    basket.TypeBasket,
-			Category:      basket.Restaurant.Category.Name,
+			ID:                 basket.ID,
+			Name:               basket.Name,
+			Latitude:           basket.Store.Latitude,
+			Longitude:          basket.Store.Longitude,
+			Address:            basket.Store.Address,
+			Rating:             basket.Store.Rating,
+			OriginalPrice:      basket.OriginalPrice,
+			DiscountPercentage: basket.DiscountPercentage,
+			Category:           basket.Store.Category.Name,
 		}
 		response = append(response, basketResponse)
 	}
@@ -86,14 +85,13 @@ func (h *BasketHandler) GetBasket(c *gin.Context) {
 	}
 
 	response := responses.BasketResponse{
-		ID:            strconv.Itoa(int(basket.ID)),
-		Name:          basket.Name,
-		Address:       basket.Restaurant.Address,
-		Rating:        basket.Restaurant.Rating,
-		OriginalPrice: basket.OriginalPrice,
-		DiscountPrice: basket.Price,
-		TypeBasket:    basket.TypeBasket,
-		Category:      basket.Restaurant.Category.Name,
+		ID:                 basket.ID,
+		Name:               basket.Name,
+		Address:            basket.Store.Address,
+		Rating:             basket.Store.Rating,
+		OriginalPrice:      basket.OriginalPrice,
+		DiscountPercentage: basket.DiscountPercentage,
+		Category:           basket.Store.Category.Name,
 	}
 
 	c.JSON(http.StatusOK, response)

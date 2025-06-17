@@ -3,6 +3,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import '../constants/auth_status.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../constants/app_text.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
@@ -32,6 +33,7 @@ class AuthProvider with ChangeNotifier {
       _isMerchant = false;
     }
     notifyListeners();
+    print("AuthProvider initialized: isLoggedIn=$isLoggedIn, user=$_user, isMerchant=$_isMerchant");
   }
 
   Future<String?> login(String email, String password) async {
@@ -41,8 +43,6 @@ class AuthProvider with ChangeNotifier {
 
     try {
       final loginResponse = await _authService.login(email, password);
-      print("Login response: success=${loginResponse.success},error=${loginResponse.errorMessage}");
-
       if (loginResponse.success) {
         _user = loginResponse.user;
         final token = loginResponse.token;
@@ -52,22 +52,20 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return null; 
       } else {
-
         _status = AuthStatus.error;
-        _errorMessage = loginResponse.errorMessage ?? 'Identifiants incorrects';
+        _errorMessage = loginResponse.errorMessage ?? TextLogin.IncorrectCredentials;
         notifyListeners();
 
         if (loginResponse.errorMessage == "Please confirm your email before logging in.") {
-          print("Email not confirmed");
-          return "confirm_email";
+        return TextLogin.confirmEmailCode;
         }
-        return "error";
+      return loginResponse.errorMessage;
       }
     } catch (e) {
       _status = AuthStatus.error;
       _errorMessage = e.toString();
       notifyListeners();
-      return "error";
+      return e.toString();
     }
   }
 

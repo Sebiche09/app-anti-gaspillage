@@ -1,26 +1,26 @@
 import 'dart:convert';
-import '../models/restaurantCategory.dart';
+import '../models/storeCategory.dart';
 import 'api_service.dart';
 
-class RestaurantService {
+class StoreService {
   final ApiService _apiService;
   
-  RestaurantService({required ApiService apiService}) 
+  StoreService({required ApiService apiService}) 
       : _apiService = apiService;
   
-  Future<List<RestaurantCategory>> getCategories() async {
+  Future<List<StoreCategory>> getCategories() async {
     try {
       final response = await _apiService.get('/api/categories');
-      print("Réponse brute de l'API: $response"); // Ajoutez ce log
+      print("Réponse brute de l'API: $response"); 
       
       // La réponse est probablement un Map avec une clé 'data', pas directement une List
       if (response != null && response is Map<String, dynamic> && response.containsKey('data')) {
         final data = response['data'] as List;
         print("Données extraites: $data");
-        return data.map((item) => RestaurantCategory.fromJson(item)).toList();
+        return data.map((item) => StoreCategory.fromJson(item)).toList();
       } else if (response != null && response is List) {
         // Au cas où l'API renvoie directement une liste
-        return response.map((item) => RestaurantCategory.fromJson(item)).toList();
+        return response.map((item) => StoreCategory.fromJson(item)).toList();
       } else {
         print("Format invalide: $response");
         throw Exception('Format de données categories invalide');
@@ -31,7 +31,7 @@ class RestaurantService {
     }
   }
   
-  Future<Map<String, dynamic>> createRestaurant({
+  Future<Map<String, dynamic>> createStore({
     required String name,
     required String address,
     required String city,
@@ -49,7 +49,7 @@ class RestaurantService {
         'category_id': categoryId,
       };
       
-      final response = await _apiService.post('/api/merchants/restaurants', data);
+      final response = await _apiService.post('/api/merchants/stores', data);
       
       if (response != null) {
         return {
@@ -59,14 +59,14 @@ class RestaurantService {
       } else {
         return {
           'success': false,
-          'message': 'Échec de la création du restaurant',
+          'message': 'Échec de la création du magasin',
         };
       }
     } catch (e) {
-      print("❌ Erreur lors de la création du restaurant: $e");
+      print("❌ Erreur lors de la création du magasin: $e");
       return {
         'success': false,
-        'message': 'Erreur lors de la création du restaurant: $e',
+        'message': 'Erreur lors de la création du magasin: $e',
       };
     }
   }

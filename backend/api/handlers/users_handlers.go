@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Sebiche09/app-anti-gaspillage.git/api/requests"
+	"github.com/Sebiche09/app-anti-gaspillage.git/api/responses"
 	"github.com/Sebiche09/app-anti-gaspillage.git/services"
 	"github.com/Sebiche09/app-anti-gaspillage.git/utils"
 	"github.com/gin-gonic/gin"
@@ -25,7 +26,7 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 // @Accept json
 // @Produce json
 // @Param credentials body requests.LoginRequest true "User credentials"
-// @Success 200 {object} map[string]string{token=string}
+// @Success 200 {object} responses.LoginResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /api/auth/login [post]
@@ -36,7 +37,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.UserService.Login(req.Email, req.Password)
+	token, refreshToken, err := h.UserService.Login(req.Email, req.Password)
 	if err != nil {
 		if err.Error() == "invalid credentials" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
@@ -48,7 +49,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, responses.LoginResponse{Token: token, RefreshToken: refreshToken})
 }
 
 // signup godoc
@@ -197,4 +198,36 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, users)
+}
+
+// refresh-token godoc
+// @Summary Refresh user token
+// @Description Refresh the user's authentication token
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Success 200 {object} responses.LoginResponse
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/auth/refresh-token [post]
+func (h *UserHandler) RefreshToken(c *gin.Context) {
+	var req requests.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	newToken, newRefreshToken, err := h.UserService.RefreshToken(req.RefreshToken)
+	if err != nil {
+		if err.Error() == "invalid refresh token" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.LoginResponse{Token: newToken, RefreshToken: newRefreshToken})
 }

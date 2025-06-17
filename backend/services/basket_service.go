@@ -26,14 +26,14 @@ func (s *BasketService) GetBasket(id int) (*models.Basket, error) {
 
 func (s *BasketService) CreateBasket(basketRequest requests.CreateBasketRequest, userId uint) error {
 	basket := models.Basket{
-		RestaurantID:   basketRequest.RestaurantID,
-		Name:           basketRequest.Name,
-		TypeBasket:     basketRequest.TypeBasket,
-		Description:    basketRequest.Description,
-		Price:          basketRequest.Price,
-		OriginalPrice:  basketRequest.OriginalPrice,
-		Quantity:       basketRequest.Quantity,
-		ExpirationDate: basketRequest.ExpirationDate,
+		StoreID:            basketRequest.StoreID,
+		ConfigurationID:    basketRequest.ConfigurationID,
+		Name:               basketRequest.Name,
+		Description:        basketRequest.Description,
+		DiscountPercentage: basketRequest.DiscountPercentage,
+		OriginalPrice:      basketRequest.OriginalPrice,
+		Quantity:           basketRequest.Quantity,
+		ExpirationDate:     basketRequest.ExpirationDate,
 	}
 
 	// Passer le modèle au repository
@@ -47,7 +47,7 @@ func (s *BasketService) UpdateBasket(id int, updates models.Basket, userId int) 
 	}
 
 	// Vérifie si le basket appartient au restaurant de l'utilisateur
-	if basket.RestaurantID != userId {
+	if basket.StoreID != userId {
 		return nil, errors.New("not authorized to update this basket")
 	}
 
@@ -62,7 +62,7 @@ func (s *BasketService) DeleteBasket(id int, userId int) error {
 	}
 
 	// Vérifie si le basket appartient au restaurant de l'utilisateur
-	if basket.RestaurantID != userId {
+	if basket.StoreID != userId {
 		return errors.New("not authorized to delete this basket")
 	}
 

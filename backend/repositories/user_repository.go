@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"time"
+
 	"github.com/Sebiche09/app-anti-gaspillage.git/models"
 	"gorm.io/gorm"
 )
@@ -47,23 +49,23 @@ func (r *UserRepository) IsMerchant(userID uint) (bool, error) {
 	return merchantCount > 0, nil
 }
 
-func (r *UserRepository) GetStaffRestaurantIDs(userID uint) ([]uint, error) {
-	var restaurantIDs []uint
+func (r *UserRepository) GetStaffStoreIDs(userID uint) ([]uint, error) {
+	var storeIDs []uint
 
-	err := r.DB.Model(&models.RestaurantStaff{}).
-		Select("restaurant_id").
+	err := r.DB.Model(&models.StoreStaff{}).
+		Select("store_id").
 		Where("user_id = ?", userID).
-		Pluck("restaurant_id", &restaurantIDs).
+		Pluck("store_id", &storeIDs).
 		Error
 
-	return restaurantIDs, err
+	return storeIDs, err
 }
 
-func (r *UserRepository) IsStaffOfRestaurant(userID, restaurantID uint) (bool, error) {
+func (r *UserRepository) IsStaffOfStore(userID, storeID uint) (bool, error) {
 	var staffCount int64
 
-	err := r.DB.Model(&models.RestaurantStaff{}).
-		Where("user_id = ? AND restaurant_id = ?", userID, restaurantID).
+	err := r.DB.Model(&models.StoreStaff{}).
+		Where("user_id = ? AND store_id = ?", userID, storeID).
 		Count(&staffCount).Error
 
 	if err != nil {
@@ -77,4 +79,18 @@ func (r *UserRepository) GetUsers() ([]models.User, error) {
 	var users []models.User
 	err := r.DB.Find(&users).Error
 	return users, err
+}
+
+func (r *UserRepository) StoreRefreshToken(userID uint, refreshToken string, expiredTime time.Time) error {
+	return r.DB.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
+		"refresh_token": refreshToken,
+		"expiry_time":   expiredTime,
+	}).Error
+}
+func (r *UserRepository) FindByRefreshToken(refreshToken string) (*models.User, error) {
+	var user models.User
+	if err := r.DB.Where("refresh_token = ?", refreshToken).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

@@ -84,7 +84,7 @@ func GenerateToken(email string, userId uint, isAdmin bool,
 		"isAdmin":          isAdmin,
 		"isMerchant":       isMerchant,
 		"staffRestaurants": staffRestaurantIDs,
-		"exp":              time.Now().Add(time.Hour * 12).Unix(),
+		"exp":              time.Now().Add(time.Second * 60).Unix(),
 	})
 
 	return token.SignedString(getSecretKey())
@@ -132,4 +132,16 @@ func VerifyToken(tokenString string) (uint, bool, bool, []uint, error) {
 	}
 
 	return userId, isAdmin, isMerchant, staffRestaurantIDs, nil
+}
+
+func GenerateRefreshToken() (string, time.Time, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", time.Time{}, err
+	}
+	refreshToken := hex.EncodeToString(bytes)
+
+	expiryTime := time.Now().Add(365 * 24 * time.Hour)
+
+	return refreshToken, expiryTime, nil
 }

@@ -22,7 +22,7 @@ type MerchantRequest struct {
 	SIREN        string `json:"siren" binding:"required,len=9" gorm:"type:varchar(9);unique;not null"`
 	PhoneNumber  string `json:"phone_number" gorm:"type:varchar(15)"`
 	Status       string `json:"status" gorm:"type:varchar(20);default:'pending'"` // pending, approved, rejected
-
+	Comment      string `json:"comment" gorm:"type:text"`                         // Commentaire de l'administrateur
 	// Relation avec l'utilisateur qui fait la demande
 	UserID uint `json:"user_id" gorm:"not null"`
 	User   User `json:"user" gorm:"constraint:OnDelete:CASCADE;"`

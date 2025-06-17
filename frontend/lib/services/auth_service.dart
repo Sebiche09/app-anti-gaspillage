@@ -33,7 +33,7 @@ class AuthService {
       final token = await getToken();
       return token != null;
     } catch (e) {
-      debugPrint('Erreur lors de la vérification de connexion: $e');
+      debugPrint('Erreur lors de la vérification de la connexion: $e');
       return false;
     }
   }
@@ -71,6 +71,7 @@ class AuthService {
   }
 
   Future<LoginResponse> _handleSuccessfulLogin(http.Response response) async {
+
     final Map<String, dynamic> responseData = json.decode(response.body);
     final String token = responseData['token'] as String;
     final String? refreshToken = responseData['refreshToken'] as String?;

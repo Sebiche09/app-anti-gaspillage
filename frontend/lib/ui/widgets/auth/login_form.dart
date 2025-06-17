@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/app_colors.dart';
+import '../../../constants/app_text.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../constants/auth_status.dart';
 import '../../../ui/screens/main_screen.dart';
@@ -40,25 +41,26 @@ class _LoginFormState extends State<LoginForm> {
       if (result == null) {
         Navigator.pushReplacementNamed(
           context,
-          authProvider.isMerchant ? '/merchant' : '/home',
-        );
-      } else if (result == "confirm_email") {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ValidationScreen(email: _emailController.text.trim()),
-          ),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Veuillez valider votre email avant de vous connecter.")),
+          authProvider.isMerchant ? TextLogin.merchantRoute : TextLogin.homeRoute, 
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authProvider.errorMessage)),
-        );
-      }
+        String errorMessage = TextLogin.loginFailedMessage;
+        if (result == TextLogin.confirmEmailCode) {
+          errorMessage = TextLogin.emailNotConfirmedMessage;
+          Navigator.pushReplacementNamed(
+            context,
+            TextLogin.validationRoute,
+            arguments: _emailController.text.trim(), 
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
+        debugPrint('Erreur de connexion: $result');
+        }
+      }  
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -74,8 +76,8 @@ class _LoginFormState extends State<LoginForm> {
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFFF5F5F5),
-              hintText: 'Email',
+              fillColor:  AppColors.formColor,
+              hintText: TextLogin.emailHint,
               prefixIcon: const Icon(Icons.email),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -84,10 +86,10 @@ class _LoginFormState extends State<LoginForm> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez entrer votre email';
+                return TextLogin.ValidatorMessageEmailEmpty;
               }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                return 'Email invalide';
+              if (!RegExp(TextLogin.RegexEmailPattern).hasMatch(value)) {
+                return TextLogin.ValidatorMessageEmailInvalid;
               }
               return null;
             },
@@ -100,8 +102,8 @@ class _LoginFormState extends State<LoginForm> {
             obscureText: _obscurePassword,
             decoration: InputDecoration(
               filled: true,
-              fillColor: const Color(0xFFF5F5F5),
-              hintText: 'Mot de passe',
+              fillColor:  AppColors.formColor,
+              hintText:  TextLogin.passwordHint,
               prefixIcon: const Icon(Icons.lock),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -120,10 +122,10 @@ class _LoginFormState extends State<LoginForm> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez entrer votre mot de passe';
+                return TextLogin.ValidatorMessagePasswordEmpty;
               }
               if (value.length < 6) {
-                return 'Le mot de passe doit contenir au moins 6 caractères';
+                return TextLogin.ValidatorMessagePasswordShort;
               }
               return null;
             },
@@ -138,7 +140,7 @@ class _LoginFormState extends State<LoginForm> {
               onPressed: isLoading ? null : _login,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -146,7 +148,7 @@ class _LoginFormState extends State<LoginForm> {
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text(
-                'Se connecter',
+                TextLogin.loginButton,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -160,10 +162,9 @@ class _LoginFormState extends State<LoginForm> {
           // Lien mot de passe oublié
           TextButton(
             onPressed: () {
-              // Navigation vers page mot de passe oublié
             },
             child: const Text(
-              'Mot de passe oublié ?',
+              TextLogin.forgotPassword,
               style: TextStyle(color: AppColors.secondary),
             ),
           ),

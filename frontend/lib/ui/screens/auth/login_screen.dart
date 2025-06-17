@@ -26,12 +26,12 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  AppText.loginTitle,
+                  TextLogin.loginTitle,
                   style: AppStyles.titleStyle,
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  AppText.loginSubtitle,
+                  TextLogin.loginSubtitle,
                   style: AppStyles.subtitleStyle,
                   textAlign: TextAlign.center,
                 ),
@@ -44,10 +44,7 @@ class LoginScreen extends StatelessWidget {
       ),
       bottomNavigationBar: RegisterLink(
         onPressed: () {
-          Navigator.push(
-            context, 
-            MaterialPageRoute(builder: (context) => const RegisterScreen()),
-          );
+          Navigator.pushNamed(context, '/register'); 
         },
       ),
     );
