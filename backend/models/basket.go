@@ -29,6 +29,6 @@ type BasketConfiguration struct {
 	Description        string  `json:"description" gorm:"type:text"`
 	DiscountPercentage float64 `json:"discount_percentage" binding:"required" gorm:"not null;default:0"`
 	Quantity           int     `json:"quantity" binding:"required" gorm:"default:0"`
-	StoreID            int     `json:"store_id" binding:"required" gorm:"not null"`
+	StoreID            uint    `json:"store_id" binding:"required" gorm:"not null"`
 	Store              Store   `json:"store" gorm:"foreignKey:StoreID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

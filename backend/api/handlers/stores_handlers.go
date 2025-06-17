@@ -19,7 +19,7 @@ func NewStoreHandler(service *services.StoreService) *StoreHandler {
 
 // summary: Récupérer toutes les catégories
 // description: Permet de récupérer la liste de toutes les catégories de stores
-// tags: Stores
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -40,7 +40,7 @@ func (h *StoreHandler) GetCategories(c *gin.Context) {
 
 // summary: Créer un magasin
 // description: Permet à un marchand de créer un magasin
-// tags: Stores
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -71,7 +71,7 @@ func (h *StoreHandler) CreateStore(c *gin.Context) {
 
 // summary: Mise à jour d'un magasin
 // description: Permet à un marchand de mettre à jour un magasin
-// tags: Stores
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -105,7 +105,7 @@ func (h *StoreHandler) UpdateStore(c *gin.Context) {
 
 // summary: supprimer le magasin d'un marchand
 // description: Permet à un marchand de supprimer un magasin
-// tags: Magasins
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -132,7 +132,7 @@ func (h *StoreHandler) DeleteStore(c *gin.Context) {
 
 // summary: Obtenir les magasins d'un marchand
 // description: Permet à un marchand de récupérer la liste de ses magasins
-// tags: Stores
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -155,7 +155,7 @@ func (h *StoreHandler) GetStoresMerchant(c *gin.Context) {
 
 // summary: Obtenir les magasins
 // description: Permet de récupérer la liste de tous les magasins
-// tags: Stores
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -176,7 +176,7 @@ func (h *StoreHandler) GetStores(c *gin.Context) {
 
 // summary: Obtenir un magasin
 // description: Permet de récupérer un magasin
-// tags: Stores
+// @Tags: Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -204,4 +204,177 @@ func (h *StoreHandler) GetStore(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": store})
+}
+
+// summary: Obtenir les membres d'un magasin
+// description: Permet de récupérer la liste des membres d'un magasin
+// @Tags: Stores
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du magasin"
+// @Success 200 {object} models.Response
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/stores/{id}/staffs [get]
+func (h *StoreHandler) GeStoreStaff(c *gin.Context) {
+	id := c.Param("id")
+
+	parsedID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	storeID := uint(parsedID)
+
+	members, err := h.service.GetStoreStaff(storeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": members})
+}
+
+// summmary: Obtenir les configurations panier du magasin
+// description: Permet de récupérer les configurations panier du magasin
+// @Tags: Stores
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du magasin"
+// @Success 200 {object} models.Response
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/stores/{id}/basket-config [get]
+func (h *StoreHandler) GetStoreBasketConfig(c *gin.Context) {
+	id := c.Param("id")
+
+	parsedID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	storeID := uint(parsedID)
+
+	config, err := h.service.GetStoreBasketConfig(storeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": config})
+}
+
+// summary: Ajouter une configuration panier au magasin
+// description: Permet d'ajouter une configuration panier au magasin
+// @Tags: Stores
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du magasin"
+// @Param input body requests.CreateBasketConfigurationRequest true "Données de la demande"
+// @Success 201 {object} models.Response
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/stores/{id}/basket-config [post]
+func (h *StoreHandler) CreateStoreBasketConfig(c *gin.Context) {
+	id := c.Param("id")
+
+	parsedID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	storeID := uint(parsedID)
+
+	var req requests.CreateBasketConfigurationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.service.CreateStoreBasketConfig(req, storeID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Configuration panier ajoutée avec succès"})
+}
+
+// summary: Mettre à jour la configuration panier du magasin
+// description: Permet de mettre à jour la configuration panier du magasin
+// @Tags: Stores
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du magasin"
+// @Param input body requests.UpdateBasketConfigurationRequest true "Données de la demande"
+// @Success 200 {object} models.Response
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/stores/{id}/basket-config [put]
+func (h *StoreHandler) UpdateStoreBasketConfig(c *gin.Context) {
+	id := c.Param("id")
+
+	parsedID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	storeID := uint(parsedID)
+
+	var req requests.UpdateBasketConfigurationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.service.UpdateStoreBasketConfig(req, storeID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration panier mise à jour avec succès"})
+}
+
+// summary: Supprimer la configuration panier du magasin
+// description: Permet de supprimer la configuration panier du magasin
+// @Tags: Stores
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param Authorization header string true "Bearer token"
+// @Param id path int true "ID du magasin"
+// @Success 200 {object} models.Response
+// @Failure 401 {object} models.ErrorResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /api/stores/{id}/basket-config [delete]
+func (h *StoreHandler) DeleteStoreBasketConfig(c *gin.Context) {
+	id := c.Param("id")
+
+	parsedID, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	storeID := uint(parsedID)
+
+	if err := h.service.DeleteStoreBasketConfig(storeID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Configuration panier supprimée avec succès"})
 }

@@ -60,3 +60,30 @@ func (r *StoreRepository) UpdateStore(store *models.Store) error {
 func (r *StoreRepository) DeleteStore(store *models.Store) error {
 	return r.db.Delete(store).Error
 }
+func (r *StoreRepository) GetStoreStaff(storeID uint) ([]models.StoreStaff, error) {
+	var storeStaff []models.StoreStaff
+	err := r.db.Where("store_id = ?", storeID).Find(&storeStaff).Error
+	if err != nil {
+		return nil, err
+	}
+	return storeStaff, nil
+}
+func (r *StoreRepository) GetStoreBasketConfig(storeID uint) (*models.BasketConfiguration, error) {
+	var config models.BasketConfiguration
+	err := r.db.Where("store_id = ?", storeID).First(&config).Error
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+func (r *StoreRepository) CreateStoreBasketConfig(config *models.BasketConfiguration) error {
+	return r.db.Create(config).Error
+}
+
+func (r *StoreRepository) UpdateStoreBasketConfig(config *models.BasketConfiguration) error {
+	return r.db.Save(config).Error
+}
+func (r *StoreRepository) DeleteStoreBasketConfig(config *models.BasketConfiguration) error {
+	return r.db.Delete(config).Error
+}
