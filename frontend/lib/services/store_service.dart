@@ -13,13 +13,11 @@ class StoreService {
       final response = await _apiService.get('/api/categories');
       print("Réponse brute de l'API: $response"); 
       
-      // La réponse est probablement un Map avec une clé 'data', pas directement une List
       if (response != null && response is Map<String, dynamic> && response.containsKey('data')) {
         final data = response['data'] as List;
         print("Données extraites: $data");
         return data.map((item) => StoreCategory.fromJson(item)).toList();
       } else if (response != null && response is List) {
-        // Au cas où l'API renvoie directement une liste
         return response.map((item) => StoreCategory.fromJson(item)).toList();
       } else {
         print("Format invalide: $response");
@@ -70,4 +68,5 @@ class StoreService {
       };
     }
   }
+  
 }

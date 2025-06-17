@@ -9,8 +9,9 @@ class BasketService {
 
   Future<List<Basket>> getBaskets() async {
     try {
-      final data = await _apiService.get('/api/baskets/') as List<dynamic>;
-      return data.map((json) => Basket.fromJson(json)).toList();
+      final data = await _apiService.get('/api/baskets/');
+      if (data == null) return [];
+      return (data as List<dynamic>).map((json) => Basket.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to load baskets: $e');
     }
@@ -27,13 +28,13 @@ class BasketService {
 
   Future<List<Basket>> searchBaskets(String query) async {
     try {
-      final data = await _apiService.get('/api/baskets/search?q=$query') as List<dynamic>;
-      return data.map((json) => Basket.fromJson(json)).toList();
+      final data = await _apiService.get('/api/baskets/search?q=$query');
+      if (data == null) return [];
+      return (data as List<dynamic>).map((json) => Basket.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to search baskets: $e');
     }
   }
-
   Future<Basket> reserveBasket(String id) async {
     try {
       final data = await _apiService.post('/api/baskets/$id/reserve', {});
