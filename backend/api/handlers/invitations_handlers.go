@@ -17,15 +17,15 @@ func NewInvitationHandler(invitationService *services.InvitationService) *Invita
 	return &InvitationHandler{invitationService: invitationService}
 }
 
-// CreateInvitation envoie une invitation à rejoindre un restaurant
-// @Summary Envoyer une invitation à rejoindre un restaurant
-// @Description Permet à un marchand d'inviter une personne à rejoindre son restaurant en tant que staff
+// CreateInvitation envoie une invitation à rejoindre un magasin
+// @Summary Envoyer une invitation à rejoindre un magasin
+// @Description Permet à un marchand d'inviter une personne à rejoindre son magasin en tant que staff
 // @Tags invitations
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param Authorization header string true "Bearer token"
-// @Param request body object{restaurant_id=integer,email=string} true "Informations de l'invitation"
+// @Param request body object{store_id=integer,email=string} true "Informations de l'invitation"
 // @Success 201 {object} object{message=string,code=string} "Invitation envoyée avec succès"
 // @Failure 400 {object} object{error=string} "Erreur dans la requête"
 // @Failure 401 {object} object{error=string} "Non authentifié"
@@ -50,8 +50,8 @@ func (h *InvitationHandler) CreateInvitation(c *gin.Context) {
 	}
 
 	var req struct {
-		RestaurantID uint   `json:"restaurant_id" binding:"required"`
-		Email        string `json:"email" binding:"required,email"`
+		StoreID uint   `json:"store_id" binding:"required"`
+		Email   string `json:"email" binding:"required,email"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -59,7 +59,7 @@ func (h *InvitationHandler) CreateInvitation(c *gin.Context) {
 		return
 	}
 
-	invitation, err := h.invitationService.CreateInvitation(userID, req.RestaurantID, req.Email)
+	invitation, err := h.invitationService.CreateInvitation(userID, req.StoreID, req.Email)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -71,9 +71,9 @@ func (h *InvitationHandler) CreateInvitation(c *gin.Context) {
 	})
 }
 
-// AcceptInvitation accepte une invitation à rejoindre un restaurant
-// @Summary Accepter une invitation à rejoindre un restaurant
-// @Description Permet à un utilisateur d'accepter une invitation à rejoindre un restaurant en tant que staff
+// AcceptInvitation accepte une invitation à rejoindre un store
+// @Summary Accepter une invitation à rejoindre un store
+// @Description Permet à un utilisateur d'accepter une invitation à rejoindre un store en tant que staff
 // @Tags invitations
 // @Accept json
 // @Produce json
@@ -110,22 +110,22 @@ func (h *InvitationHandler) AcceptInvitation(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "You have successfully joined the restaurant team"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "You have successfully joined the store team"})
 }
 
-// GetPendingInvitations récupère les invitations en attente pour un restaurant
-// @Summary Récupérer les invitations en attente pour un restaurant
-// @Description Permet à un marchand de voir toutes les invitations en attente pour son restaurant
+// GetPendingInvitations récupère les invitations en attente pour un magasin
+// @Summary Récupérer les invitations en attente pour un magasin
+// @Description Permet à un marchand de voir toutes les invitations en attente pour son magasin
 // @Tags invitations
 // @Produce json
 // @Security Bearer
 // @Param Authorization header string true "Bearer token"
-// @Param restaurantId path integer true "ID du restaurant"
+// @Param storeId path integer true "ID du store"
 // @Success 200 {array} models.Invitation "Liste des invitations en attente"
 // @Failure 400 {object} object{error=string} "Erreur dans la requête"
 // @Failure 401 {object} object{error=string} "Non authentifié"
 // @Failure 403 {object} object{error=string} "Accès non autorisé"
-// @Router /api/restaurants/{restaurantId}/invitations [get]
+// @Router /api/stores/{storeId}/invitations [get]
 func (h *InvitationHandler) GetPendingInvitations(c *gin.Context) {
 	// Extraire userID du token
 	tokenString := c.GetHeader("Authorization")
@@ -145,15 +145,15 @@ func (h *InvitationHandler) GetPendingInvitations(c *gin.Context) {
 		return
 	}
 
-	restaurantID := c.Param("id")
-	if restaurantID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "restaurant ID is required"})
+	storeID := c.Param("id")
+	if storeID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "store ID is required"})
 		return
 	}
 
 	var restIDUint uint
-	if _, err := fmt.Sscanf(restaurantID, "%d", &restIDUint); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid restaurant ID format"})
+	if _, err := fmt.Sscanf(storeID, "%d", &restIDUint); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid store ID format"})
 		return
 	}
 

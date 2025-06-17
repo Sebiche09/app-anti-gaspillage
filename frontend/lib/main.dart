@@ -23,10 +23,19 @@ import 'ui/screens/merchant/store_screen.dart';
 import 'ui/screens/auth/register_screen.dart';
 import 'ui/screens/auth/validation_screen.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final apiService = ApiService(baseUrl: ApiConfig.baseUrl);
+  final apiService = ApiService(
+    baseUrl: ApiConfig.baseUrl,
+    onSessionExpired: () {
+      // Utilise le context global
+      final authProvider = Provider.of<AuthProvider>(navigatorKey.currentContext!, listen: false);
+      authProvider.logout();
+    },
+  );
   final authService = AuthService(baseUrl: ApiConfig.baseUrl);
   final merchantService = MerchantService(apiService: apiService);
   final basketService = BasketService(apiService: apiService);
@@ -131,6 +140,7 @@ class _SoveManjeState extends State<SoveManje> {
             }
 
             return MaterialApp(
+              navigatorKey: navigatorKey, // Ajoute le navigatorKey ici !
               useInheritedMediaQuery: true,
               locale: DevicePreview.locale(context),
               builder: DevicePreview.appBuilder,

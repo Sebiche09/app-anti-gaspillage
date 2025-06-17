@@ -101,7 +101,7 @@ func (h *UserHandler) Signup(c *gin.Context) {
 // @Tags Users
 // @Accept json
 // @Produce json
-// @Param validation body CodeValidationRequest true "Email et code"
+// @Param validation body requests.CodeValidationRequest true "Email et code"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Router /api/auth/validate-code [post]
@@ -207,7 +207,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param Authorization header string true "Bearer token"
+// @Param refresh_token body requests.RefreshTokenRequest true "Refresh token"
 // @Success 200 {object} responses.LoginResponse
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string

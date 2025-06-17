@@ -279,22 +279,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "allOf": [
-                                    {
-                                        "type": "string"
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "token": {
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
+                            "$ref": "#/definitions/responses.LoginResponse"
                         }
                     },
                     "400": {
@@ -308,6 +293,109 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh-token": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Refresh the user's authentication token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Refresh user token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "refresh_token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/responses.LoginResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/resend-code": {
+            "post": {
+                "description": "Resend the validation code to the user's email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Resend validation code",
+                "parameters": [
+                    {
+                        "description": "Email address",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.ResendCodeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -372,7 +460,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CodeValidationRequest"
+                            "$ref": "#/definitions/requests.CodeValidationRequest"
                         }
                     }
                 ],
@@ -1258,6 +1346,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/merchants/magasins/{id}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Magasin ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/merchants/request-status": {
             "get": {
                 "security": [
@@ -1316,7 +1455,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/merchants/restaurants": {
+        "/api/merchants/stores": {
             "get": {
                 "security": [
                     {
@@ -1385,7 +1524,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.CreateRestaurantRequest"
+                            "$ref": "#/definitions/requests.CreateStoreRequest"
                         }
                     }
                 ],
@@ -1423,7 +1562,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/merchants/restaurants/{id}": {
+        "/api/merchants/stores/{id}": {
             "put": {
                 "security": [
                     {
@@ -1446,7 +1585,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Restaurant ID",
+                        "description": "Magasin ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1457,7 +1596,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requests.UpdateRestaurantRequest"
+                            "$ref": "#/definitions/requests.UpdateStoreRequest"
                         }
                     }
                 ],
@@ -1470,156 +1609,6 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Restaurant ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/restaurants/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "ID du restaurant",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/models.ErrorResponse"
                         }
@@ -1709,6 +1698,107 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/stores": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/stores/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID du magasin",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1721,17 +1811,6 @@ const docTemplate = `{
                 "valid": {
                     "description": "Valid is true if Time is not NULL",
                     "type": "boolean"
-                }
-            }
-        },
-        "handlers.CodeValidationRequest": {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
                 }
             }
         },
@@ -1755,13 +1834,21 @@ const docTemplate = `{
         "models.Basket": {
             "type": "object",
             "required": [
+                "configuration_id",
+                "discount_percentage",
                 "name",
                 "original_price",
-                "price",
                 "quantity",
-                "type"
+                "status_id",
+                "store_id"
             ],
             "properties": {
+                "configuration": {
+                    "$ref": "#/definitions/models.BasketConfiguration"
+                },
+                "configuration_id": {
+                    "type": "integer"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1770,6 +1857,9 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
+                },
+                "discount_percentage": {
+                    "type": "number"
                 },
                 "expiration_date": {
                     "type": "string"
@@ -1783,22 +1873,74 @@ const docTemplate = `{
                 "original_price": {
                     "type": "number"
                 },
-                "price": {
+                "quantity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.BasketStatus"
+                },
+                "status_id": {
+                    "type": "integer"
+                },
+                "store": {
+                    "$ref": "#/definitions/models.Store"
+                },
+                "store_id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BasketConfiguration": {
+            "type": "object",
+            "required": [
+                "discount_percentage",
+                "name",
+                "quantity",
+                "store_id"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discount_percentage": {
                     "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "quantity": {
                     "type": "integer"
                 },
-                "restaurant": {
-                    "$ref": "#/definitions/models.Restaurant"
+                "store": {
+                    "$ref": "#/definitions/models.Store"
                 },
-                "restaurant_id": {
+                "store_id": {
                     "type": "integer"
                 },
-                "type": {
-                    "type": "string"
-                },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BasketStatus": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1826,6 +1968,9 @@ const docTemplate = `{
         "models.Invitation": {
             "type": "object",
             "properties": {
+                "acceptedAt": {
+                    "type": "string"
+                },
                 "code": {
                     "type": "string"
                 },
@@ -1844,15 +1989,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "restaurant": {
-                    "$ref": "#/definitions/models.Restaurant"
-                },
-                "restaurantID": {
-                    "type": "integer"
-                },
-                "role": {
-                    "type": "string"
-                },
                 "sender": {
                     "$ref": "#/definitions/models.User"
                 },
@@ -1861,6 +1997,12 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/models.InvitationStatus"
+                },
+                "store": {
+                    "$ref": "#/definitions/models.Store"
+                },
+                "storeID": {
+                    "type": "integer"
                 },
                 "token": {
                     "type": "string"
@@ -1946,6 +2088,10 @@ const docTemplate = `{
                 "business_name": {
                     "type": "string"
                 },
+                "comment": {
+                    "description": "Commentaire de l'administrateur",
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -1990,7 +2136,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Restaurant": {
+        "models.Store": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2031,7 +2177,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "merchant": {
-                    "description": "Relation avec le commerçant",
+                    "description": "Relation avec Merchant (clé étrangère)",
                     "allOf": [
                         {
                             "$ref": "#/definitions/models.Merchant"
@@ -2080,6 +2226,10 @@ const docTemplate = `{
                     "description": "Validation d'email",
                     "type": "string"
                 },
+                "expiry_time": {
+                    "description": "Temps d'expiration du token de rafraîchissement",
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -2095,6 +2245,10 @@ const docTemplate = `{
                     "description": "Hash du mot de passe",
                     "type": "string"
                 },
+                "refresh_token": {
+                    "description": "Token de rafraîchissement",
+                    "type": "string"
+                },
                 "updatedAt": {
                     "type": "string"
                 },
@@ -2104,22 +2258,44 @@ const docTemplate = `{
                 }
             }
         },
+        "requests.CodeValidationRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
         "requests.CreateBasketRequest": {
             "type": "object",
             "required": [
+                "configuration_id",
+                "discount_percentage",
                 "name",
                 "original_price",
-                "price",
                 "quantity",
-                "restaurant_id",
-                "type"
+                "status_id",
+                "store_id"
             ],
             "properties": {
+                "configuration_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "description": {
                     "type": "string",
                     "example": "Ceci est un panier suprise"
                 },
+                "discount_percentage": {
+                    "description": "20% de réduction",
+                    "type": "number",
+                    "example": 0.2
+                },
                 "expiration_date": {
+                    "description": "Date d'expiration du panier, au format YYYY-MM-DD",
                     "type": "string",
                     "example": "2022-12-31"
                 },
@@ -2128,24 +2304,23 @@ const docTemplate = `{
                     "example": "panier surprise"
                 },
                 "original_price": {
+                    "description": "Prix original avant réduction",
                     "type": "number",
                     "example": 22
                 },
-                "price": {
-                    "type": "number",
-                    "example": 8.99
-                },
                 "quantity": {
+                    "description": "Quantité disponible",
                     "type": "integer",
                     "example": 2
                 },
-                "restaurant_id": {
+                "status_id": {
+                    "description": "ID du statut du panier",
                     "type": "integer",
                     "example": 1
                 },
-                "type": {
-                    "type": "string",
-                    "example": "surprise"
+                "store_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -2175,7 +2350,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.CreateRestaurantRequest": {
+        "requests.CreateStoreRequest": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2194,7 +2369,7 @@ const docTemplate = `{
                     "example": "cayenne"
                 },
                 "name": {
-                    "description": "Nom du restaurant (obligatoire)",
+                    "description": "Nom du magasin (obligatoire)",
                     "type": "string",
                     "example": "petit bateau 1"
                 },
@@ -2227,6 +2402,17 @@ const docTemplate = `{
                 }
             }
         },
+        "requests.RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "refresh_token"
+            ],
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "requests.RegisterRequest": {
             "type": "object",
             "required": [
@@ -2242,6 +2428,17 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 8,
                     "example": "password123"
+                }
+            }
+        },
+        "requests.ResendCodeRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 }
             }
         },
@@ -2274,7 +2471,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requests.UpdateRestaurantRequest": {
+        "requests.UpdateStoreRequest": {
             "type": "object",
             "properties": {
                 "address": {
@@ -2293,7 +2490,7 @@ const docTemplate = `{
                     "example": "remire"
                 },
                 "name": {
-                    "description": "Nom du restaurant (obligatoire)",
+                    "description": "Nom du magasin (obligatoire)",
                     "type": "string",
                     "example": "petit bateau 2"
                 },
@@ -2318,11 +2515,14 @@ const docTemplate = `{
                 "category": {
                     "type": "string"
                 },
+                "discountPercentage": {
+                    "type": "number"
+                },
                 "discountPrice": {
                     "type": "number"
                 },
                 "id": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "latitude": {
                     "type": "number"
@@ -2338,8 +2538,16 @@ const docTemplate = `{
                 },
                 "rating": {
                     "type": "number"
+                }
+            }
+        },
+        "responses.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
                 },
-                "typeBasket": {
+                "token": {
                     "type": "string"
                 }
             }

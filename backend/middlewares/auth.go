@@ -19,6 +19,10 @@ func Authenticate(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization token not provided"})
 		return
 	}
+	const bearerPrefix = "Bearer "
+	if len(token) > len(bearerPrefix) && token[:len(bearerPrefix)] == bearerPrefix {
+		token = token[len(bearerPrefix):]
+	}
 
 	userId, isAdmin, isMerchant, staffStoreIDs, err := utils.VerifyToken(token)
 	if err != nil {

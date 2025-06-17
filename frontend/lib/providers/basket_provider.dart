@@ -36,7 +36,7 @@ class BasketsProvider with ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _error = e.toString();
-      print('Erreur de récupération des paniers: $_error'); // Débogage
+      print('Erreur de récupération des paniers: $_error'); 
       notifyListeners();
     }
   }

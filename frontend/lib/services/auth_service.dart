@@ -74,7 +74,7 @@ class AuthService {
 
     final Map<String, dynamic> responseData = json.decode(response.body);
     final String token = responseData['token'] as String;
-    final String? refreshToken = responseData['refreshToken'] as String?;
+    final String? refreshToken = responseData['refresh_token'] as String?;
     User? user;
     try {
       if (responseData.containsKey('user')) {
@@ -96,7 +96,8 @@ class AuthService {
       _storage.write(key: _expiryTimeKey, value: expiryTime.toIso8601String()),
       if (refreshToken != null) _storage.write(key: _refreshTokenKey, value: refreshToken),
     ]);
-
+    debugPrint('Connexion réussie: $token');
+    debugPrint('refreshToken: $refreshToken');
     return LoginResponse(
       success: true,
       token: token,
@@ -144,9 +145,7 @@ class AuthService {
   }
 
   Future<String?> getToken() async {
-    // Vérifier d'abord le cache
     if (_cachedToken != null && _cachedTokenExpiry != null) {
-      // Si le token en cache est toujours valide
       if (_cachedTokenExpiry!.isAfter(DateTime.now())) {
         return _cachedToken;
       }
@@ -159,23 +158,18 @@ class AuthService {
       return null;
     }
     
-    // Si pas d'expiration définie ou token expiré
     if (expiryTimeString == null || 
         DateTime.parse(expiryTimeString).isBefore(DateTime.now())) {
-      // Tenter le rafraîchissement
       final refreshed = await refreshToken();
       if (!refreshed) {
-        // En cas d'échec, déconnecter l'utilisateur
         await logout();
         return null;
       }
-      // Retourner le nouveau token
       final newToken = await _storage.read(key: _tokenKey);
       _cachedToken = newToken;
       return newToken;
     }
     
-    // Mise en cache
     _cachedToken = token;
     _cachedTokenExpiry = DateTime.parse(expiryTimeString);
     
@@ -190,32 +184,30 @@ class AuthService {
     }
     
     try {
-      final url = '$baseUrl/api/auth/refresh';
+      final url = '$baseUrl/api/auth/refresh-token';
       
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'refreshToken': refreshToken}),
+        body: jsonEncode({'refresh_token': refreshToken}),
       ).timeout(_requestTimeout);
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final newToken = data['token'] as String;
-        final newRefreshToken = data['refreshToken'] as String?;
+        final newRefreshToken = data['refresh_token'] as String?;
         
-        // Mettre à jour les tokens
         _cachedToken = newToken;
         final expiryTime = DateTime.now().add(_tokenValidity);
         _cachedTokenExpiry = expiryTime;
         
-        // Mettre à jour le stockage
         await _storage.write(key: _tokenKey, value: newToken);
         await _storage.write(key: _expiryTimeKey, value: expiryTime.toIso8601String());
         
         if (newRefreshToken != null) {
           await _storage.write(key: _refreshTokenKey, value: newRefreshToken);
         }
-        
+        debugPrint('Rafraîchissement réussi: $newToken');
         return true;
       } else {
         debugPrint('Échec du rafraîchissement: ${response.statusCode} ${response.body}');
@@ -272,18 +264,17 @@ class AuthService {
 
 
   Future<void> logout() async {
-    _cachedToken = null;
-    _cachedUser = null;
-    _cachedTokenExpiry = null;
-    
-    await Future.wait([
-      _storage.delete(key: _tokenKey),
-      _storage.delete(key: _refreshTokenKey),
-      _storage.delete(key: _expiryTimeKey),
-      _storage.delete(key: _userKey),
-    ]);
-    print('Déconnexion réussie');
-  }
+  _cachedToken = null;
+  _cachedUser = null;
+  _cachedTokenExpiry = null;
+
+  await Future.wait([
+    _storage.delete(key: _tokenKey),
+    _storage.delete(key: _refreshTokenKey),
+    _storage.delete(key: _expiryTimeKey),
+    _storage.delete(key: _userKey),
+  ]);
+}
   Future<bool> verifyCode(String email, String code) async {
     final url = '$baseUrl/api/auth/validate-code';
 

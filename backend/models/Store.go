@@ -7,7 +7,7 @@ import (
 type Store struct {
 	gorm.Model
 	MerchantID  uint    `json:"merchant_id" gorm:"not null;index"`            // ID du commerçant (clé étrangère)
-	Name        string  `json:"name" gorm:"type:varchar(255);not null"`       // Nom du restaurant (obligatoire)
+	Name        string  `json:"name" gorm:"type:varchar(255);not null"`       // Nom du magasin (obligatoire)
 	Latitude    float64 `json:"latitude" gorm:"type:decimal(10,8);not null"`  // Latitude (format décimal)
 	Longitude   float64 `json:"longitude" gorm:"type:decimal(11,8);not null"` // Longitude (format décimal)
 	Address     string  `json:"address" gorm:"type:text;not null"`            // Adresse complète

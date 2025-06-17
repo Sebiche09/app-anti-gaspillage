@@ -15,7 +15,7 @@ type CreateBasketRequest struct {
 }
 
 type UpdateBasketRequest struct {
-	RestaurantID   int        `json:"restaurant_id" example:"1" binding:"required"`
+	StoreID        int        `json:"store_id" example:"1" binding:"required"`
 	Name           string     `json:"name" example:"panier surprise" binding:"required"`
 	TypeBasket     string     `json:"type" example:"surprise" binding:"required"`
 	Description    string     `json:"description" example:"Ceci est un panier suprise" gorm:"type:text"`

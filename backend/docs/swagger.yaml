@@ -7,13 +7,6 @@ definitions:
         description: Valid is true if Time is not NULL
         type: boolean
     type: object
-  handlers.CodeValidationRequest:
-    properties:
-      code:
-        type: string
-      email:
-        type: string
-    type: object
   handlers.ProcessRequestInput:
     properties:
       status:
@@ -28,12 +21,18 @@ definitions:
     type: object
   models.Basket:
     properties:
+      configuration:
+        $ref: '#/definitions/models.BasketConfiguration'
+      configuration_id:
+        type: integer
       createdAt:
         type: string
       deletedAt:
         $ref: '#/definitions/gorm.DeletedAt'
       description:
         type: string
+      discount_percentage:
+        type: number
       expiration_date:
         type: string
       id:
@@ -42,24 +41,61 @@ definitions:
         type: string
       original_price:
         type: number
-      price:
-        type: number
       quantity:
         type: integer
-      restaurant:
-        $ref: '#/definitions/models.Restaurant'
-      restaurant_id:
+      status:
+        $ref: '#/definitions/models.BasketStatus'
+      status_id:
         type: integer
-      type:
-        type: string
+      store:
+        $ref: '#/definitions/models.Store'
+      store_id:
+        type: integer
       updatedAt:
         type: string
     required:
+    - configuration_id
+    - discount_percentage
     - name
     - original_price
-    - price
     - quantity
-    - type
+    - status_id
+    - store_id
+    type: object
+  models.BasketConfiguration:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      discount_percentage:
+        type: number
+      id:
+        type: integer
+      name:
+        type: string
+      quantity:
+        type: integer
+      store:
+        $ref: '#/definitions/models.Store'
+      store_id:
+        type: integer
+      updatedAt:
+        type: string
+    required:
+    - discount_percentage
+    - name
+    - quantity
+    - store_id
+    type: object
+  models.BasketStatus:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   models.Category:
     properties:
@@ -76,6 +112,8 @@ definitions:
     type: object
   models.Invitation:
     properties:
+      acceptedAt:
+        type: string
       code:
         type: string
       createdAt:
@@ -88,18 +126,16 @@ definitions:
         type: string
       id:
         type: integer
-      restaurant:
-        $ref: '#/definitions/models.Restaurant'
-      restaurantID:
-        type: integer
-      role:
-        type: string
       sender:
         $ref: '#/definitions/models.User'
       senderID:
         type: integer
       status:
         $ref: '#/definitions/models.InvitationStatus'
+      store:
+        $ref: '#/definitions/models.Store'
+      storeID:
+        type: integer
       token:
         type: string
       updatedAt:
@@ -155,6 +191,9 @@ definitions:
     properties:
       business_name:
         type: string
+      comment:
+        description: Commentaire de l'administrateur
+        type: string
       createdAt:
         type: string
       deletedAt:
@@ -189,7 +228,7 @@ definitions:
         example: Opération réussie
         type: string
     type: object
-  models.Restaurant:
+  models.Store:
     properties:
       address:
         description: Adresse complète
@@ -219,7 +258,7 @@ definitions:
       merchant:
         allOf:
         - $ref: '#/definitions/models.Merchant'
-        description: Relation avec le commerçant
+        description: Relation avec Merchant (clé étrangère)
       merchant_id:
         description: ID du commerçant (clé étrangère)
         type: integer
@@ -247,6 +286,9 @@ definitions:
       email:
         description: Validation d'email
         type: string
+      expiry_time:
+        description: Temps d'expiration du token de rafraîchissement
+        type: string
       id:
         type: integer
       is_admin:
@@ -258,6 +300,9 @@ definitions:
       password_hash:
         description: Hash du mot de passe
         type: string
+      refresh_token:
+        description: Token de rafraîchissement
+        type: string
       updatedAt:
         type: string
       validationCode:
@@ -267,39 +312,55 @@ definitions:
     - email
     - password_hash
     type: object
+  requests.CodeValidationRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    type: object
   requests.CreateBasketRequest:
     properties:
+      configuration_id:
+        example: 1
+        type: integer
       description:
         example: Ceci est un panier suprise
         type: string
+      discount_percentage:
+        description: 20% de réduction
+        example: 0.2
+        type: number
       expiration_date:
+        description: Date d'expiration du panier, au format YYYY-MM-DD
         example: "2022-12-31"
         type: string
       name:
         example: panier surprise
         type: string
       original_price:
+        description: Prix original avant réduction
         example: 22
         type: number
-      price:
-        example: 8.99
-        type: number
       quantity:
+        description: Quantité disponible
         example: 2
         type: integer
-      restaurant_id:
+      status_id:
+        description: ID du statut du panier
         example: 1
         type: integer
-      type:
-        example: surprise
-        type: string
+      store_id:
+        example: 1
+        type: integer
     required:
+    - configuration_id
+    - discount_percentage
     - name
     - original_price
-    - price
     - quantity
-    - restaurant_id
-    - type
+    - status_id
+    - store_id
     type: object
   requests.CreateMerchantRequest:
     properties:
@@ -320,7 +381,7 @@ definitions:
     - email_pro
     - siren
     type: object
-  requests.CreateRestaurantRequest:
+  requests.CreateStoreRequest:
     properties:
       address:
         description: Adresse complète
@@ -335,7 +396,7 @@ definitions:
         example: cayenne
         type: string
       name:
-        description: Nom du restaurant (obligatoire)
+        description: Nom du magasin (obligatoire)
         example: petit bateau 1
         type: string
       phone_number:
@@ -359,6 +420,13 @@ definitions:
     - email
     - password
     type: object
+  requests.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
   requests.RegisterRequest:
     properties:
       email:
@@ -371,6 +439,13 @@ definitions:
     required:
     - email
     - password
+    type: object
+  requests.ResendCodeRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
   requests.UpdateMerchantRequest:
     properties:
@@ -394,7 +469,7 @@ definitions:
     - email_pro
     - siren
     type: object
-  requests.UpdateRestaurantRequest:
+  requests.UpdateStoreRequest:
     properties:
       address:
         description: Adresse complète
@@ -409,7 +484,7 @@ definitions:
         example: remire
         type: string
       name:
-        description: Nom du restaurant (obligatoire)
+        description: Nom du magasin (obligatoire)
         example: petit bateau 2
         type: string
       phone_number:
@@ -427,10 +502,12 @@ definitions:
         type: string
       category:
         type: string
+      discountPercentage:
+        type: number
       discountPrice:
         type: number
       id:
-        type: string
+        type: integer
       latitude:
         type: number
       longitude:
@@ -441,7 +518,12 @@ definitions:
         type: number
       rating:
         type: number
-      typeBasket:
+    type: object
+  responses.LoginResponse:
+    properties:
+      refresh_token:
+        type: string
+      token:
         type: string
     type: object
 info:
@@ -617,14 +699,7 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              allOf:
-              - type: string
-              - properties:
-                  token:
-                    type: string
-                type: object
-            type: object
+            $ref: '#/definitions/responses.LoginResponse'
         "400":
           description: Bad Request
           schema:
@@ -638,6 +713,72 @@ paths:
               type: string
             type: object
       summary: Authenticate user
+      tags:
+      - Users
+  /api/auth/refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: Refresh the user's authentication token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/requests.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/responses.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Refresh user token
+      tags:
+      - Users
+  /api/auth/resend-code:
+    post:
+      consumes:
+      - application/json
+      description: Resend the validation code to the user's email
+      parameters:
+      - description: Email address
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/requests.ResendCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Resend validation code
       tags:
       - Users
   /api/auth/signup:
@@ -673,7 +814,7 @@ paths:
         name: validation
         required: true
         schema:
-          $ref: '#/definitions/handlers.CodeValidationRequest'
+          $ref: '#/definitions/requests.CodeValidationRequest'
       produces:
       - application/json
       responses:
@@ -1246,6 +1387,38 @@ paths:
       summary: Update un marchand
       tags:
       - Merchants
+  /api/merchants/magasins/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Magasin ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
   /api/merchants/request-status:
     get:
       description: Récupère les détails de la demande de marchand de l'utilisateur
@@ -1284,7 +1457,7 @@ paths:
       summary: Récupérer la demande du marchand
       tags:
       - Users
-  /api/merchants/restaurants:
+  /api/merchants/stores:
     get:
       consumes:
       - application/json
@@ -1325,7 +1498,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/requests.CreateRestaurantRequest'
+          $ref: '#/definitions/requests.CreateStoreRequest'
       produces:
       - application/json
       responses:
@@ -1351,38 +1524,7 @@ paths:
             $ref: '#/definitions/models.ErrorResponse'
       security:
       - Bearer: []
-  /api/merchants/restaurants/{id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: Bearer token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: Restaurant ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - Bearer: []
+  /api/merchants/stores/{id}:
     put:
       consumes:
       - application/json
@@ -1392,7 +1534,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - description: Restaurant ID
+      - description: Magasin ID
         in: path
         name: id
         required: true
@@ -1402,7 +1544,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/requests.UpdateRestaurantRequest'
+          $ref: '#/definitions/requests.UpdateStoreRequest'
       produces:
       - application/json
       responses:
@@ -1412,69 +1554,6 @@ paths:
             $ref: '#/definitions/models.Response'
         "401":
           description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - Bearer: []
-  /api/restaurants:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Bearer token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-      security:
-      - Bearer: []
-  /api/restaurants/{id}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: Bearer token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: ID du restaurant
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/models.ErrorResponse'
-        "404":
-          description: Not Found
           schema:
             $ref: '#/definitions/models.ErrorResponse'
         "500":
@@ -1533,4 +1612,67 @@ paths:
       summary: Récupérer les invitations en attente pour un restaurant
       tags:
       - invitations
+  /api/stores:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
+  /api/stores/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: ID du magasin
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - Bearer: []
 swagger: "2.0"

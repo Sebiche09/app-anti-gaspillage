@@ -92,12 +92,11 @@ func (s *UserService) Login(email string, password string) (string, string, erro
 	if err != nil {
 		return "", "", errors.New("failed to generate refresh token")
 	}
-
+	println("Generated refresh token:", refreshToken)
 	err = s.UserRepo.StoreRefreshToken(user.ID, refreshToken, expiredTime)
 	if err != nil {
 		return "", "", errors.New("failed to store refresh token")
 	}
-
 	return token, refreshToken, nil
 }
 

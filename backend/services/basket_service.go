@@ -46,7 +46,7 @@ func (s *BasketService) UpdateBasket(id int, updates models.Basket, userId int) 
 		return nil, err
 	}
 
-	// Vérifie si le basket appartient au restaurant de l'utilisateur
+	// Vérifie si le basket appartient au magasin de l'utilisateur
 	if basket.StoreID != userId {
 		return nil, errors.New("not authorized to update this basket")
 	}
@@ -61,7 +61,7 @@ func (s *BasketService) DeleteBasket(id int, userId int) error {
 		return err
 	}
 
-	// Vérifie si le basket appartient au restaurant de l'utilisateur
+	// Vérifie si le basket appartient au magasin de l'utilisateur
 	if basket.StoreID != userId {
 		return errors.New("not authorized to delete this basket")
 	}
