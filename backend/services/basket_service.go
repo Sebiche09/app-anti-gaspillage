@@ -24,19 +24,17 @@ func (s *BasketService) GetBasket(id int) (*models.Basket, error) {
 	return s.BasketRepo.GetByID(id)
 }
 
-func (s *BasketService) CreateBasket(basketRequest requests.CreateBasketRequest, userId uint) error {
+func (s *BasketService) CreateBasket(req requests.CreateBasketRequest, userId uint) error {
 	basket := models.Basket{
-		StoreID:            basketRequest.StoreID,
-		ConfigurationID:    basketRequest.ConfigurationID,
-		Name:               basketRequest.Name,
-		Description:        basketRequest.Description,
-		DiscountPercentage: basketRequest.DiscountPercentage,
-		OriginalPrice:      basketRequest.OriginalPrice,
-		Quantity:           basketRequest.Quantity,
-		ExpirationDate:     basketRequest.ExpirationDate,
+		StoreID:            req.StoreID,
+		ConfigurationID:    req.ConfigurationID,
+		Name:               req.Name,
+		Description:        req.Description,
+		DiscountPercentage: req.DiscountPercentage,
+		OriginalPrice:      req.OriginalPrice,
+		Quantity:           req.Quantity,
+		ExpirationDate:     req.ExpirationDate,
 	}
-
-	// Passer le modèle au repository
 	return s.BasketRepo.Create(&basket)
 }
 
@@ -67,4 +65,12 @@ func (s *BasketService) DeleteBasket(id int, userId int) error {
 	}
 
 	return s.BasketRepo.Delete(basket)
+}
+func (s *BasketService) GetBasketsByStore(storeId int) ([]models.Basket, error) {
+	var baskets []models.Basket
+	err := s.BasketRepo.DB.Where("store_id = ?", storeId).Find(&baskets).Error
+	if err != nil {
+		return nil, err
+	}
+	return baskets, nil
 }

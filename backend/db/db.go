@@ -34,6 +34,7 @@ func Init() *gorm.DB {
 		&models.Invitation{},
 	)
 	initDefaultCategories(db)
+	initDefaultStatuses(db)
 	return db
 
 }
@@ -52,6 +53,23 @@ func initDefaultCategories(db *gorm.DB) {
 
 		if result.RowsAffected == 0 {
 			db.Create(&category)
+		}
+	}
+}
+func initDefaultStatuses(db *gorm.DB) {
+	defaultStatuses := []models.BasketStatus{
+		{Name: "Disponible"},
+		{Name: "Réservé"},
+		{Name: "Vendu"},
+		{Name: "Annulé"},
+	}
+
+	for _, status := range defaultStatuses {
+		var existingStatus models.BasketStatus
+		result := db.Where("name = ?", status.Name).First(&existingStatus)
+
+		if result.RowsAffected == 0 {
+			db.Create(&status)
 		}
 	}
 }

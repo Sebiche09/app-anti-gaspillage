@@ -37,6 +37,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 		{
 			stores.GET("/", h.Store.GetStores)
 			stores.GET("/:id", h.Store.GetStore)
+			stores.GET("/:id/baskets", h.Basket.GetBasketsByStore)
 
 			// Route pour obtenir les invitations en attente d'un magasin
 			stores.GET("/:id/request-status-statustions", h.Invitation.GetPendingInvitations)
@@ -45,6 +46,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, h *handlers.Handlers) {
 		merchants := authenticated.Group("/merchants")
 		{
 			merchants.POST("/", h.Merchant.CreateMerchantRequest)
+			merchants.DELETE("stores/:id", h.Store.DeleteStore)
 			merchants.GET("/request-status", h.Merchant.MerchantRequestStatus)
 			merchants.GET("/stores", h.Store.GetStoresMerchant)
 			merchants.PUT("/stores/:id", h.Store.UpdateStore)

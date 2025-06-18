@@ -1,7 +1,7 @@
 import 'dart:convert';
 import '../models/storeCategory.dart';
 import 'api_service.dart';
-
+import '../models/store.dart';
 class StoreService {
   final ApiService _apiService;
   
@@ -11,7 +11,6 @@ class StoreService {
   Future<List<StoreCategory>> getCategories() async {
     try {
       final response = await _apiService.get('/api/categories');
-      print("Réponse brute de l'API: $response"); 
       
       if (response != null && response is Map<String, dynamic> && response.containsKey('data')) {
         final data = response['data'] as List;
@@ -68,5 +67,63 @@ class StoreService {
       };
     }
   }
-  
+  Future<List<Store>> getStores() async {
+    try {
+      final response = await _apiService.get('/api/merchants/stores');
+      
+      if (response != null && response is Map<String, dynamic> && response.containsKey('data')) {
+        final data = response['data'] as List;
+        return data.map((item) => Store.fromJson(item)).toList();
+      } else if (response != null && response is List) {
+        return response.map((item) => Store.fromJson(item)).toList();
+      } else {
+        throw Exception('Format de données magasins invalide');
+      }
+    } catch (e) {
+      throw Exception('Erreur lors de la récupération des magasins: $e');
+    }
+  }
+
+  Future<bool> updateStore(Store store) async {
+    try {
+      final Map<String, dynamic> data = {
+        'name': store.name,
+        'address': store.address,
+        'city': store.city,
+        'postal_code': store.postalCode,
+        'phone_number': store.phoneNumber,
+        'category_id': store.categoryId,
+      };
+      
+      final response = await _apiService.put('/api/merchants/stores/${store.id}', data);
+      
+      if (response != null) {
+        print("✅ Magasin mis à jour avec succès");
+        return true;
+      } else {
+        print("❌ Échec de la mise à jour du magasin");
+        return false;
+      }
+    } catch (e) {
+      print("❌ Erreur lors de la mise à jour du magasin: $e");
+      throw Exception('Erreur lors de la mise à jour du magasin: $e');
+    }
+  }
+
+  Future<bool> deleteStore(int id) async {
+    try {
+      final response = await _apiService.delete('/api/merchants/stores/$id');
+      
+      if (response != null) {
+        print("✅ Magasin supprimé avec succès");
+        return true;
+      } else {
+        print("❌ Échec de la suppression du magasin");
+        return false;
+      }
+    } catch (e) {
+      print("❌ Erreur lors de la suppression du magasin: $e");
+      throw Exception('Erreur lors de la suppression du magasin: $e');
+    }
+  }
 }

@@ -88,17 +88,19 @@ class ValidationScreen extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.resendCode(email);
 
+    final errorMsg = authProvider.errorMessage ?? '';
+
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+      SnackBar(
         content: Text(
-            success
-                ? 'Code de vérification renvoyé'
-                : authProvider.errorMessage.isNotEmpty
-                    ? authProvider.errorMessage
-                    : 'Erreur lors de l\'envoi du code',
+          success
+              ? 'Code de vérification renvoyé'
+              : errorMsg.isNotEmpty
+                  ? errorMsg
+                  : 'Erreur lors de l\'envoi du code',
         ),
         duration: const Duration(seconds: 2),
-        ),
+      ),
     );
-  }      
+  }  
 }

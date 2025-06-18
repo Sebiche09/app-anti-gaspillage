@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/store_provider.dart'; 
 import '../../../constants/app_colors.dart';
 import 'store_screen.dart';
 import 'basket_screen.dart';
@@ -23,6 +24,15 @@ class _MerchantScreenState extends State<MerchantScreen> {
     StatsScreen(),
     MoreScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final storeProvider = Provider.of<StoreProvider>(context, listen: false);
+      storeProvider.fetchStores();
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {

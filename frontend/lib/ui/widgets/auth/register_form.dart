@@ -6,7 +6,7 @@ import '../../../constants/auth_status.dart';
 
 class RegisterForm extends StatefulWidget {
   final Function(String email)? onRegistrationSuccess;
-
+  
   const RegisterForm({
     super.key,
     this.onRegistrationSuccess,
@@ -20,11 +20,11 @@ class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    // Libération des ressources
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -39,7 +39,6 @@ class _RegisterFormState extends State<RegisterForm> {
       );
 
       if (success && mounted) {
-        // Appeler le callback avec l'email
         widget.onRegistrationSuccess?.call(_emailController.text.trim());
       }
     }
@@ -49,12 +48,12 @@ class _RegisterFormState extends State<RegisterForm> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final isLoading = authProvider.status == AuthStatus.authenticating;
+    final errorMsg = authProvider.errorMessage ?? '';
 
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          // Champ email
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -80,7 +79,6 @@ class _RegisterFormState extends State<RegisterForm> {
             },
           ),
           const SizedBox(height: 16),
-          // Champ mot de passe
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
@@ -116,7 +114,6 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 24),
 
-          // Bouton d'inscription
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -142,10 +139,11 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 80),
 
-          if (authProvider.status == AuthStatus.error &&
-              authProvider.errorMessage.isNotEmpty)
+          
+
+          if (authProvider.status == AuthStatus.error && errorMsg.isNotEmpty)
             Text(
-              authProvider.errorMessage,
+              errorMsg,
               style: const TextStyle(
                 color: AppColors.error,
                 fontWeight: FontWeight.bold,

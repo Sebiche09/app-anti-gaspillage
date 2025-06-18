@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../providers/merchant_provider.dart';
 import 'merchant/merchant_screen.dart';
 import 'merchant/add_store_screen.dart';
+import '../../models/merchant_application_status.dart';
+import '../../providers/error_notifier.dart';
+
 
 class BeMerchantScreen extends StatefulWidget {
   const BeMerchantScreen({super.key});
@@ -24,6 +27,7 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
   final TextEditingController _sirenController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
 
+
   @override
   void initState() {
     super.initState();
@@ -35,23 +39,26 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
     
     try {
       await merchantProvider.checkApplicationStatus();
-      
-      setState(() {
-        _isLoading = false;
-        _hasExistingApplication = merchantProvider.status != MerchantApplicationStatus.notApplied;
-        _existingApplicationData = merchantProvider.merchantData;
-        
-        if (_hasExistingApplication && _existingApplicationData != null) {
-          _businessNameController.text = _existingApplicationData!['business_name'] ?? '';
-          _emailProController.text = _existingApplicationData!['email_pro'] ?? '';
-          _sirenController.text = _existingApplicationData!['siren'] ?? '';
-          _phoneNumberController.text = _existingApplicationData!['phone_number'] ?? '';
-        }
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasExistingApplication = merchantProvider.status != MerchantApplicationStatus.notApplied;
+          _existingApplicationData = merchantProvider.merchantData;
+          
+          if (_hasExistingApplication && _existingApplicationData != null) {
+            _businessNameController.text = _existingApplicationData!['business_name'] ?? '';
+            _emailProController.text = _existingApplicationData!['email_pro'] ?? '';
+            _sirenController.text = _existingApplicationData!['siren'] ?? '';
+            _phoneNumberController.text = _existingApplicationData!['phone_number'] ?? '';
+          }
+        });
+      }
     } catch (e) {
+    if (mounted) {
       setState(() {
         _isLoading = false;
       });
+    }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la vérification: ${e.toString()}')),
       );
@@ -70,8 +77,9 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final merchantProvider = Provider.of<MerchantProvider>(context, listen: false);
-      
-      setState(() => _isLoading = true);
+      if (mounted) {
+        setState(() => _isLoading = true);
+      }
       
       final success = await merchantProvider.submitApplication(
         businessName: _businessNameController.text,
@@ -79,8 +87,9 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
         siren: _sirenController.text,
         phoneNumber: _phoneNumberController.text,
       );
-      
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
       
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,8 +97,9 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
         );
         _checkExistingApplication();
       } else {
+        final errorNotifier = Provider.of<ErrorNotifier>(context, listen: false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(merchantProvider.errorMessage ?? 'Erreur lors de l\'envoi')),
+          SnackBar(content: Text(errorNotifier.errorMessage ?? 'Erreur lors de l\'envoi')),
         );
       }
     }
@@ -114,9 +124,26 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
               child: _hasExistingApplication 
                 ? _buildExistingApplicationView()
-                : _buildApplicationForm(),
+                : _buildApplicationForm(), // <-- le bouton n'est plus ici
             ),
       ),
+      bottomNavigationBar: !_hasExistingApplication
+          ? Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _submitForm,
+                child: const Text('Envoyer la demande'),
+              ),
+            )
+          : null,
     );
   }
 
@@ -180,9 +207,11 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
               ),
             ),
             onPressed: () {
-              setState(() {
-                _hasExistingApplication = false;
-              });
+              if (mounted) {
+                setState(() {
+                  _hasExistingApplication = false;
+                });
+              }
             },
             child: const Text('Soumettre une nouvelle demande'),
           ),
@@ -335,18 +364,6 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
                     : null),
           ),
           const SizedBox(height: 30),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: _submitForm,
-            child: const Text('Envoyer la demande'),
-          ),
         ],
       ),
     );

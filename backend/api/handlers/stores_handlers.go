@@ -19,7 +19,7 @@ func NewStoreHandler(service *services.StoreService) *StoreHandler {
 
 // summary: Récupérer toutes les catégories
 // description: Permet de récupérer la liste de toutes les catégories de stores
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -40,7 +40,7 @@ func (h *StoreHandler) GetCategories(c *gin.Context) {
 
 // summary: Créer un magasin
 // description: Permet à un marchand de créer un magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -71,7 +71,7 @@ func (h *StoreHandler) CreateStore(c *gin.Context) {
 
 // summary: Mise à jour d'un magasin
 // description: Permet à un marchand de mettre à jour un magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -105,7 +105,7 @@ func (h *StoreHandler) UpdateStore(c *gin.Context) {
 
 // summary: supprimer le magasin d'un marchand
 // description: Permet à un marchand de supprimer un magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -114,7 +114,7 @@ func (h *StoreHandler) UpdateStore(c *gin.Context) {
 // @Success 200 {object} models.Response
 // @Failure 401 {object} models.ErrorResponse
 // @Failure 500 {object} models.ErrorResponse
-// @Router /api/merchants/magasins/{id} [delete]
+// @Router /api/merchants/stores/{id} [delete]
 func (h *StoreHandler) DeleteStore(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -132,7 +132,7 @@ func (h *StoreHandler) DeleteStore(c *gin.Context) {
 
 // summary: Obtenir les magasins d'un marchand
 // description: Permet à un marchand de récupérer la liste de ses magasins
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -155,7 +155,7 @@ func (h *StoreHandler) GetStoresMerchant(c *gin.Context) {
 
 // summary: Obtenir les magasins
 // description: Permet de récupérer la liste de tous les magasins
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -176,7 +176,7 @@ func (h *StoreHandler) GetStores(c *gin.Context) {
 
 // summary: Obtenir un magasin
 // description: Permet de récupérer un magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -208,7 +208,7 @@ func (h *StoreHandler) GetStore(c *gin.Context) {
 
 // summary: Obtenir les membres d'un magasin
 // description: Permet de récupérer la liste des membres d'un magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -240,7 +240,7 @@ func (h *StoreHandler) GeStoreStaff(c *gin.Context) {
 
 // summmary: Obtenir les configurations panier du magasin
 // description: Permet de récupérer les configurations panier du magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -272,7 +272,7 @@ func (h *StoreHandler) GetStoreBasketConfig(c *gin.Context) {
 
 // summary: Ajouter une configuration panier au magasin
 // description: Permet d'ajouter une configuration panier au magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -311,7 +311,7 @@ func (h *StoreHandler) CreateStoreBasketConfig(c *gin.Context) {
 
 // summary: Mettre à jour la configuration panier du magasin
 // description: Permet de mettre à jour la configuration panier du magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -350,7 +350,7 @@ func (h *StoreHandler) UpdateStoreBasketConfig(c *gin.Context) {
 
 // summary: Supprimer la configuration panier du magasin
 // description: Permet de supprimer la configuration panier du magasin
-// @Tags: Stores
+// @Tags Stores
 // @Accept json
 // @Produce json
 // @Security Bearer

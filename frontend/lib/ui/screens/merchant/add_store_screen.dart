@@ -27,7 +27,6 @@ class _AddStoreScreenState extends State<AddStoreScreen> {
   void initState() {
     super.initState();
     print("Initialisation de AddStoreScreen");
-    // Ne pas appeler Provider dans initState directement
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadCategories();
     });

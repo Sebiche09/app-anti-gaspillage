@@ -46,7 +46,6 @@ func generateInviteCode() string {
 }
 
 func (s *InvitationService) CreateInvitation(senderID, storeID uint, email string) (*models.Invitation, error) {
-	// Vérifier si le sender est autorisé pour ce magasin
 	store, err := s.storeRepo.GetStoreByID(storeID)
 	if err != nil {
 		return nil, err
@@ -57,29 +56,24 @@ func (s *InvitationService) CreateInvitation(senderID, storeID uint, email strin
 		return nil, errors.New("unauthorized: you don't own this store")
 	}
 
-	// Générer le code unique
 	code := generateInviteCode()
 
-	// Créer l'invitation
 	invitation := &models.Invitation{
 		StoreID:   storeID,
 		SenderID:  senderID,
 		Email:     email,
 		Code:      code,
 		Status:    models.InvitationPending,
-		ExpiresAt: time.Now().Add(7 * 24 * time.Hour), // 7 jours
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
 	}
 
 	if err := s.invitationRepo.CreateInvitation(invitation); err != nil {
 		return nil, err
 	}
 
-	// Envoyer un email avec le code d'invitation
 	invitationURL := "http://localhost:3000//invitations/accept?code=" + code
 	err = s.emailService.SendInvitationEmail(email, invitationURL)
 	if err != nil {
-		// Loggez l'erreur mais ne faites pas échouer l'opération
-		// si l'envoi d'email échoue
 	}
 
 	return invitation, nil
@@ -100,14 +94,11 @@ func (s *InvitationService) AcceptInvitation(code string, userID uint) error {
 		s.invitationRepo.UpdateInvitation(invitation)
 		return errors.New("invitation has expired")
 	}
-
-	// Vérifier que l'utilisateur n'est pas déjà membre du staff
 	isMember, _ := s.staffRepo.IsUserStaffMember(invitation.StoreID, userID)
 	if isMember {
 		return errors.New("you are already a staff member of this store")
 	}
 
-	// Ajouter l'utilisateur au staff
 	staff := &models.StoreStaff{
 		StoreID: invitation.StoreID,
 		UserID:  userID,
@@ -117,13 +108,11 @@ func (s *InvitationService) AcceptInvitation(code string, userID uint) error {
 		return err
 	}
 
-	// Mettre à jour le statut de l'invitation
 	invitation.Status = models.InvitationAccepted
 	return s.invitationRepo.UpdateInvitation(invitation)
 }
 
 func (s *InvitationService) GetPendingInvitations(storeID uint, userID uint) ([]models.Invitation, error) {
-	// Vérifier que l'utilisateur est autorisé à voir les invitations de ce magasin
 	merchant, err := s.merchantRepo.FindMerchantByUserID(userID)
 	if err != nil {
 		return nil, err
@@ -147,7 +136,6 @@ func (s *InvitationService) CancelInvitation(invitationID, userID uint) error {
 		return err
 	}
 
-	// Vérifier que c'est bien le sender qui annule
 	if invitation.SenderID != userID {
 		return errors.New("only the sender can cancel the invitation")
 	}

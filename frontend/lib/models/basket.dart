@@ -1,11 +1,11 @@
 class Basket {
-  final String id;
+  final int id;
   final String name;
   final String address;
   final double rating;
   final double originalPrice;
-  final double discountPrice;
-  final String typeBasket;
+  final double discountPercentage;
+  final String description;
   final String category;
   final double latitude;
   final double longitude;
@@ -16,8 +16,8 @@ class Basket {
     required this.address,
     required this.rating,
     required this.originalPrice,
-    required this.discountPrice,
-    required this.typeBasket,
+    required this.discountPercentage,
+    required this.description,
     required this.category,
     required this.latitude,   
     required this.longitude,  
@@ -30,8 +30,8 @@ class Basket {
       address: json['address'],
       rating: (json['rating'] ?? 0).toDouble(),
       originalPrice: (json['originalPrice'] ?? 0).toDouble(),
-      discountPrice: (json['discountPrice'] ?? 0).toDouble(),
-      typeBasket: json['typeBasket'],
+      discountPercentage: (json['discountPercentage'] ?? 0).toDouble(),
+      description: json['description'] ?? '',
       category: json['category'],
       latitude: (json['latitude'] ?? 0).toDouble(),    
       longitude: (json['longitude'] ?? 0).toDouble(),  

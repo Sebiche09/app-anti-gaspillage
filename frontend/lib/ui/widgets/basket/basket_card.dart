@@ -34,7 +34,6 @@ class BasketCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image du magasin
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: Stack(
@@ -76,7 +75,6 @@ class BasketCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Infos du magasin
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -100,7 +98,6 @@ class BasketCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Évaluation et prix
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -120,7 +117,7 @@ class BasketCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '\$${basket.originalPrice.toStringAsFixed(1)}',
+                    '${(basket.originalPrice ?? 0).toStringAsFixed(1)} €',
                     style: const TextStyle(
                       color: AppColors.border,
                       decoration: TextDecoration.lineThrough,
@@ -129,9 +126,9 @@ class BasketCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '\$${basket.discountPrice.toStringAsFixed(1)}',
+                    '${(basket.originalPrice * (1 - basket.discountPercentage / 100)).toStringAsFixed(1)} €',
                     style: const TextStyle(
-                      color: AppColors.secondary, //
+                      color: AppColors.secondary,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),

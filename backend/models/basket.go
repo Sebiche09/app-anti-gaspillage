@@ -6,7 +6,7 @@ import (
 
 type Basket struct {
 	gorm.Model
-	ConfigurationID    int                 `json:"configuration_id" binding:"required" gorm:"not null"`
+	ConfigurationID    *int                `json:"configuration_id" gorm:"default:null"`
 	StoreID            int                 `json:"store_id" binding:"required" gorm:"not null"`
 	Name               string              `json:"name" binding:"required" gorm:"unique;not null"`
 	Description        string              `json:"description" gorm:"type:text"`
@@ -14,7 +14,7 @@ type Basket struct {
 	OriginalPrice      float64             `json:"original_price" binding:"required" gorm:"not null"`
 	Quantity           int                 `json:"quantity" binding:"required" gorm:"default:0"`
 	ExpirationDate     *string             `json:"expiration_date" gorm:"type:date"`
-	StatusID           int                 `json:"status_id" binding:"required" gorm:"not null"`
+	StatusID           int                 `json:"status_id" binding:"required" gorm:"not null;default:1"`
 	Status             BasketStatus        `json:"status" gorm:"foreignKey:StatusID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Configuration      BasketConfiguration `json:"configuration" gorm:"foreignKey:ConfigurationID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Store              Store               `json:"store" gorm:"foreignKey:StoreID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
