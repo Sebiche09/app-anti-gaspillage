@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:device_preview/device_preview.dart';
@@ -23,46 +24,129 @@ import 'ui/screens/merchant/store_screen.dart';
 import 'ui/screens/auth/register_screen.dart';
 import 'ui/screens/auth/validation_screen.dart';
 import 'ui/screens/merchant/merchant_screen.dart';
+import 'providers/error_notifier.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final apiService = ApiService(
-    baseUrl: ApiConfig.baseUrl,
-    onSessionExpired: () {
-      // Utilise le context global
-      final authProvider = Provider.of<AuthProvider>(navigatorKey.currentContext!, listen: false);
-      authProvider.logout();
-    },
-  );
-  final authService = AuthService(baseUrl: ApiConfig.baseUrl);
-  final merchantService = MerchantService(apiService: apiService);
-  final basketService = BasketService(apiService: apiService);
-  final storeService = StoreService(apiService: apiService);
   runApp(
     DevicePreview(
       enabled: true,
       builder: (context) => MultiProvider(
         providers: [
-          ChangeNotifierProvider<AuthProvider>(
-            create: (_) => AuthProvider(authService),
+          ChangeNotifierProvider<ErrorNotifier>(
+            create: (_) => ErrorNotifier(),
           ),
-          ChangeNotifierProvider<BasketsProvider>(
-            create: (_) => BasketsProvider(basketService),
+          ChangeNotifierProxyProvider<ErrorNotifier, AuthProvider>(
+            create: (context) {
+              final authService = AuthService(baseUrl: ApiConfig.baseUrl);
+              return AuthProvider(authService, Provider.of<ErrorNotifier>(context, listen: false));
+            },
+            update: (context, errorNotifier, previous) {
+              if (previous != null) {
+                return previous;
+              }
+              final authService = AuthService(baseUrl: ApiConfig.baseUrl);
+              return AuthProvider(authService, errorNotifier);
+            },
           ),
-          ChangeNotifierProvider<MerchantProvider>(
-            create: (_) => MerchantProvider(merchantService: merchantService),
+          ChangeNotifierProxyProvider2<ErrorNotifier, AuthProvider, BasketsProvider>(
+            create: (context) {
+              final errorNotifier = Provider.of<ErrorNotifier>(context, listen: false);
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final apiService = ApiService(
+                baseUrl: ApiConfig.baseUrl,
+                onSessionExpired: () => _handleSessionExpired(context, authProvider),
+              );
+              final basketService = BasketService(apiService: apiService);
+              return BasketsProvider(basketService, errorNotifier);
+            },
+            update: (context, errorNotifier, authProvider, previous) {
+              if (previous != null) {
+                return previous;
+              }
+              final apiService = ApiService(
+                baseUrl: ApiConfig.baseUrl,
+                onSessionExpired: () => _handleSessionExpired(context, authProvider),
+              );
+              final basketService = BasketService(apiService: apiService);
+              return BasketsProvider(basketService, errorNotifier);
+            },
           ),
-          ChangeNotifierProvider<StoreProvider>(
-            create: (_) => StoreProvider(storeService: storeService),
+          ChangeNotifierProxyProvider2<ErrorNotifier, AuthProvider, MerchantProvider>(
+            create: (context) {
+              final errorNotifier = Provider.of<ErrorNotifier>(context, listen: false);
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final apiService = ApiService(
+                baseUrl: ApiConfig.baseUrl,
+                onSessionExpired: () => _handleSessionExpired(context, authProvider),
+              );
+              final merchantService = MerchantService(apiService: apiService);
+              return MerchantProvider(merchantService: merchantService, errorNotifier: errorNotifier);
+            },
+            update: (context, errorNotifier, authProvider, previous) {
+              if (previous != null) {
+                return previous;
+              }
+              final apiService = ApiService(
+                baseUrl: ApiConfig.baseUrl,
+                onSessionExpired: () => _handleSessionExpired(context, authProvider),
+              );
+              final merchantService = MerchantService(apiService: apiService);
+              return MerchantProvider(merchantService: merchantService, errorNotifier: errorNotifier);
+            },
+          ),
+          ChangeNotifierProxyProvider2<ErrorNotifier, AuthProvider, StoreProvider>(
+            create: (context) {
+              final errorNotifier = Provider.of<ErrorNotifier>(context, listen: false);
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final apiService = ApiService(
+                baseUrl: ApiConfig.baseUrl,
+                onSessionExpired: () => _handleSessionExpired(context, authProvider),
+              );
+              final storeService = StoreService(apiService: apiService);
+              return StoreProvider(storeService: storeService, errorNotifier: errorNotifier);
+            },
+            update: (context, errorNotifier, authProvider, previous) {
+              if (previous != null) {
+                return previous;
+              }
+              final apiService = ApiService(
+                baseUrl: ApiConfig.baseUrl,
+                onSessionExpired: () => _handleSessionExpired(context, authProvider),
+              );
+              final storeService = StoreService(apiService: apiService);
+              return StoreProvider(storeService: storeService, errorNotifier: errorNotifier);
+            },
           ),
         ],
         child: const LoadingApp(),
       ),
     ),
   );
+}
+
+// Fonction sécurisée pour gérer l'expiration de session
+void _handleSessionExpired(BuildContext context, AuthProvider authProvider) {
+  // Vérifier si le context est encore valide et monté
+  if (!context.mounted) return;
+  
+  try {
+    // Vérifier si l'AuthProvider n'est pas disposé
+    if (authProvider.hasListeners) {
+      authProvider.logout();
+    }
+  } catch (e) {
+    // Si l'AuthProvider est disposé, naviguer directement vers l'écran de connexion
+    if (navigatorKey.currentState != null) {
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+      );
+    }
+  }
 }
 
 //Ce widget sert de point d'entrée pour l'application
@@ -87,9 +171,11 @@ class _LoadingAppState extends State<LoadingApp> {
   // Cette méthode charge les ressources nécessaires, comme la localisation
   Future<void> _loadResources() async {
     await HomeHeader.loadLocation();
-    setState(() {
-      isLoaded = true;
-    });
+    if (mounted) {
+      setState(() {
+        isLoaded = true;
+      });
+    }
   }
 
   // Cette méthode construit l'interface utilisateur du widget
@@ -119,7 +205,13 @@ class _SoveManjeState extends State<SoveManje> {
   @override
   void initState() {
     super.initState();
-    _initFuture = Provider.of<AuthProvider>(context, listen: false).initialize();
+    _initFuture = _initializeAuth();
+  }
+
+  Future<void> _initializeAuth() async {
+    if (mounted) {
+      await Provider.of<AuthProvider>(context, listen: false).initialize();
+    }
   }
 
   // Cette méthode est appelée pour construire l'interface utilisateur du widget
@@ -134,14 +226,16 @@ class _SoveManjeState extends State<SoveManje> {
               return const MaterialApp(home: LoadingScreen());
             }
 
-            if (authProvider.status == AuthStatus.authenticated) {
+            if (authProvider.status == AuthStatus.authenticated && mounted) {
               Future.microtask(() {
-                Provider.of<BasketsProvider>(context, listen: false).fetchBaskets();
+                if (mounted) {
+                  Provider.of<BasketsProvider>(context, listen: false).fetchBaskets();
+                }
               });
             }
 
             return MaterialApp(
-              navigatorKey: navigatorKey, // Ajoute le navigatorKey ici !
+              navigatorKey: navigatorKey,
               useInheritedMediaQuery: true,
               locale: DevicePreview.locale(context),
               builder: DevicePreview.appBuilder,

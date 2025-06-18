@@ -1,134 +1,155 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../constants/auth_status.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 import '../constants/app_text.dart';
+import 'error_notifier.dart';
 
+/// Provider pour la gestion de l'authentification.
+///
+/// Permet de gérer la connexion, l'inscription, la déconnexion,
+/// la vérification de code, et l'état d'authentification de l'utilisateur.
+/// Utilise un [AuthService] pour communiquer avec l'API.
+/// Les erreurs sont remontées via un [ErrorNotifier] global.
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;
+  final ErrorNotifier _errorNotifier;
 
   User? _user;
-  String _errorMessage = '';
   AuthStatus _status = AuthStatus.uninitialized;
   bool _isMerchant = false;
 
-  AuthProvider(this._authService);
+  /// Initialise le provider avec un service d'authentification et un ErrorNotifier.
+  AuthProvider(this._authService, this._errorNotifier);
 
   User? get user => _user;
-  String get errorMessage => _errorMessage;
   AuthStatus get status => _status;
   bool get isMerchant => _isMerchant;
 
-  Future<void> initialize() async {
-    final isLoggedIn = await _authService.isLoggedIn();
+  /// Retourne le message d'erreur actuel, ou null s'il n'y en a pas.
+  String? get errorMessage => _errorNotifier.errorMessage;
 
-    if (isLoggedIn) {
-      _user = await _authService.getCurrentUser();
-      final token = await _authService.getToken();
-      _isMerchant = _decodeMerchantStatus(token);
-      _status = AuthStatus.authenticated;
+  /// Met à jour l'état d'authentification et le message d'erreur.
+  void _setStatus(AuthStatus status, {String errorMessage = '', bool notify = true}) {
+    _status = status;
+    if (errorMessage.isNotEmpty) {
+      _errorNotifier.setError(errorMessage);
     } else {
-      _status = AuthStatus.unauthenticated;
-      _isMerchant = false;
+      _errorNotifier.clearError();
     }
-    notifyListeners();
-    print("AuthProvider initialized: isLoggedIn=$isLoggedIn, user=$_user, isMerchant=$_isMerchant");
+    if (notify) notifyListeners();
   }
 
-  Future<String?> login(String email, String password) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = '';
-    notifyListeners();
-
-    try {
-      final loginResponse = await _authService.login(email, password);
-      if (loginResponse.success) {
-        _user = loginResponse.user;
-        final token = loginResponse.token;
-        _isMerchant = _decodeMerchantStatus(token);
-
-        _status = AuthStatus.authenticated;
-        notifyListeners();
-        return null; 
-      } else {
-        _status = AuthStatus.error;
-        _errorMessage = loginResponse.errorMessage ?? TextLogin.IncorrectCredentials;
-        notifyListeners();
-
-        if (loginResponse.errorMessage == "Please confirm your email before logging in.") {
-        return TextLogin.confirmEmailCode;
-        }
-      return loginResponse.errorMessage;
-      }
-    } catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.toString();
-      notifyListeners();
-      return e.toString();
-    }
+  /// Met à jour l'utilisateur courant et le statut marchand à partir du token JWT.
+  void _setUser(User? user, String? token) {
+    _user = user;
+    _isMerchant = _decodeMerchantStatus(token);
   }
 
-
-  Future<bool> register(String email, String password) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = '';
-    notifyListeners();
-
-    try {
-      final registerResponse = await _authService.register(email, password);
-      _user = registerResponse.user;
-      _isMerchant = _decodeMerchantStatus(registerResponse.token);
-      _status = AuthStatus.authenticated;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.toString();
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<void> logout() async {
-    await _authService.logout();
-    _user = null;
-    _status = AuthStatus.unauthenticated;
-    _isMerchant = false;
-    notifyListeners();
-  }
-
+  /// Décode le statut marchand à partir du token JWT.
   bool _decodeMerchantStatus(String? token) {
     if (token == null) return false;
     final decodedToken = JwtDecoder.decode(token);
     return decodedToken['isMerchant'] ?? false;
   }
 
-  Future<bool> verifyCode(String email, String code) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = '';
-    notifyListeners();
+  /// Initialise l'état d'authentification au démarrage de l'application.
+  Future<void> initialize() async {
+    try {
+      final isLoggedIn = await _authService.isLoggedIn();
+      if (isLoggedIn) {
+        final user = await _authService.getCurrentUser();
+        final token = await _authService.getToken();
+        _setUser(user, token);
+        _setStatus(AuthStatus.authenticated);
+      } else {
+        _setUser(null, null);
+        _setStatus(AuthStatus.unauthenticated);
+      }
+    } catch (e) {
+      _setStatus(AuthStatus.error, errorMessage: e.toString());
+    }
+  }
 
-    final success = await _authService.verifyCode(email, code);
+  /// Effectue la connexion avec email et mot de passe.
+  ///
+  /// Retourne `null` si la connexion réussit, sinon un message d'erreur.
+  /// En cas d'erreur spécifique, retourne un code texte pour gestion UI.
+  Future<String?> login(String email, String password) async {
+    _setStatus(AuthStatus.authenticating);
+    try {
+      final loginResponse = await _authService.login(email, password);
+      if (loginResponse.success) {
+        _setUser(loginResponse.user, loginResponse.token);
+        _setStatus(AuthStatus.authenticated);
+        return null;
+      } else {
+        final errorMsg = loginResponse.errorMessage ?? TextLogin.IncorrectCredentials;
+        _setStatus(AuthStatus.error, errorMessage: errorMsg);
+        if (errorMsg == "Please confirm your email before logging in.") {
+          return TextLogin.confirmEmailCode;
+        }
+        return errorMsg;
+      }
+    } catch (e) {
+      _setStatus(AuthStatus.error, errorMessage: e.toString());
+      return e.toString();
+    }
+  }
 
-    if (success) {
-      _status = AuthStatus.unauthenticated;
-      notifyListeners();
+  /// Effectue l'inscription avec email et mot de passe.
+  ///
+  /// Retourne `true` si l'inscription réussit, `false` sinon.
+  Future<bool> register(String email, String password) async {
+    _setStatus(AuthStatus.authenticating);
+    try {
+      final registerResponse = await _authService.register(email, password);
+      _setUser(registerResponse.user, registerResponse.token);
+      _setStatus(AuthStatus.authenticated);
       return true;
-    } else {
-      _status = AuthStatus.error;
-      _errorMessage = 'Code de vérification incorrect';
-      notifyListeners();
+    } catch (e) {
+      _setStatus(AuthStatus.error, errorMessage: e.toString());
       return false;
     }
   }
+
+  /// Effectue la déconnexion.
+  Future<void> logout() async {
+    await _authService.logout();
+    _setUser(null, null);
+    _setStatus(AuthStatus.unauthenticated);
+  }
+
+  /// Vérifie le code envoyé par email.
+  ///
+  /// Retourne `true` si le code est correct, `false` sinon.
+  Future<bool> verifyCode(String email, String code) async {
+    _setStatus(AuthStatus.authenticating);
+    try {
+      final success = await _authService.verifyCode(email, code);
+      if (success) {
+        _setStatus(AuthStatus.unauthenticated);
+        return true;
+      } else {
+        _setStatus(AuthStatus.error, errorMessage: 'Code de vérification incorrect');
+        return false;
+      }
+    } catch (e) {
+      _setStatus(AuthStatus.error, errorMessage: e.toString());
+      return false;
+    }
+  }
+
+  /// Renvoyer le code de vérification par email.
+  ///
+  /// Retourne `true` si l'envoi réussit, `false` sinon.
   Future<bool> resendCode(String email) async {
     try {
       await _authService.resendVerificationCode(email);
       return true;
     } catch (e) {
-      _errorMessage = "Erreur lors de l'envoi du code : $e";
-      notifyListeners();
+      _setStatus(_status, errorMessage: "Erreur lors de l'envoi du code : $e");
       return false;
     }
   }

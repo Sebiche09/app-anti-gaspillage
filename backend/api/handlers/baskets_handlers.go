@@ -19,7 +19,7 @@ type BasketHandler struct {
 func NewBasketHandler(basketService *services.BasketService) *BasketHandler {
 	return &BasketHandler{BasketService: basketService}
 }
-
+   
 // GetBaskets godoc
 // @Summary Get all baskets
 // @Description Retrieve a list of all baskets

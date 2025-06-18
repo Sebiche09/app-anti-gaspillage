@@ -45,7 +45,7 @@ class _VerificationFormState extends State<VerificationForm> {
               children: List.generate(6, (index) => _buildCodeInput(index)),
             ),
             const SizedBox(height: 16),
-            if (authProvider.errorMessage.isNotEmpty)
+            if ((authProvider.errorMessage ?? '').isNotEmpty)
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 16),
@@ -60,7 +60,7 @@ class _VerificationFormState extends State<VerificationForm> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        authProvider.errorMessage,
+                        authProvider.errorMessage ?? '',
                         style: TextStyle(
                           color: Colors.red.shade700,
                           fontSize: 14,
@@ -164,7 +164,7 @@ class _VerificationFormState extends State<VerificationForm> {
     else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authProvider.errorMessage)),
+          SnackBar(content: Text(authProvider.errorMessage ?? '')),
         );
       }
     }

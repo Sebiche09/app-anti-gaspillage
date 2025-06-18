@@ -6,7 +6,7 @@ import '../../../constants/auth_status.dart';
 
 class RegisterForm extends StatefulWidget {
   final Function(String email)? onRegistrationSuccess;
-
+  
   const RegisterForm({
     super.key,
     this.onRegistrationSuccess,
@@ -20,6 +20,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _obscurePassword = true;
 
   @override
@@ -49,6 +50,7 @@ class _RegisterFormState extends State<RegisterForm> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final isLoading = authProvider.status == AuthStatus.authenticating;
+    final errorMsg = authProvider.errorMessage ?? '';
 
     return Form(
       key: _formKey,
@@ -142,10 +144,11 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 80),
 
-          if (authProvider.status == AuthStatus.error &&
-              authProvider.errorMessage.isNotEmpty)
+          
+
+          if (authProvider.status == AuthStatus.error && errorMsg.isNotEmpty)
             Text(
-              authProvider.errorMessage,
+              errorMsg,
               style: const TextStyle(
                 color: AppColors.error,
                 fontWeight: FontWeight.bold,

@@ -7,6 +7,7 @@ import '../common/category_selector.dart';
 import '../common/error_view.dart';
 import '../basket/basket_card.dart';
 import '../../../constants/app_colors.dart';
+import '../../../providers/error_notifier.dart';
 
 class ContentSection extends StatelessWidget {
   final String activeCategory;
@@ -40,15 +41,16 @@ class ContentSection extends StatelessWidget {
   }
 
   Widget _buildBasketsList() {
-    return Consumer<BasketsProvider>(
-      builder: (context, basketProvider, _) {
+    return Consumer2<BasketsProvider, ErrorNotifier>(
+      builder: (context, basketProvider, errorNotifier, _) {
         if (basketProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (basketProvider.error.isNotEmpty) {
+        final error = errorNotifier.errorMessage ?? '';
+        if (error.isNotEmpty) {
           return ErrorView(
-            error: basketProvider.error,
+            error: error,
             onRetry: () => basketProvider.fetchBaskets(),
           );
         }

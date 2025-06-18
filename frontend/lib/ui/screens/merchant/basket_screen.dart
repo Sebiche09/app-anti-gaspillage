@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/store.dart';
-import '../../../models/merchant_basket.dart'; // Modifie cette ligne
+import '../../../models/merchant_basket.dart'; 
 import '../../../providers/store_provider.dart';
 import '../../../providers/basket_provider.dart';
 import '../../widgets/merchant/store_header.dart';
+import '../../../providers/error_notifier.dart';
 
 class BasketScreen extends StatefulWidget {
   const BasketScreen({Key? key}) : super(key: key);
@@ -118,13 +119,17 @@ class _BasketScreenState extends State<BasketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<StoreProvider, BasketsProvider>(
-      builder: (context, storeProvider, basketsProvider, _) {
+    final errorNotifier = Provider.of<ErrorNotifier>(context);
+    final error = errorNotifier.errorMessage ?? '';
+
+    return Consumer<StoreProvider>(
+      builder: (context, storeProvider, _) {
         final stores = storeProvider.stores;
         final selectedStore = storeProvider.selectedStore;
 
         if (selectedStore != null && !_basketsLoaded) {
-          basketsProvider.fetchBasketsForStore(selectedStore.id);
+          // Charger les paniers pour le magasin sélectionné
+          Provider.of<BasketsProvider>(context, listen: false).fetchBasketsForStore(selectedStore.id);
           _basketsLoaded = true;
         }
 
@@ -158,43 +163,56 @@ class _BasketScreenState extends State<BasketScreen> {
                           style: TextStyle(color: Colors.grey[600], fontSize: 16),
                         ),
                       )
-                    : basketsProvider.isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : basketsProvider.error.isNotEmpty
-                            ? Center(
-                                child: Text(
-                                  "Erreur: ${basketsProvider.error}",
-                                  style: TextStyle(color: Colors.red[600], fontSize: 16),
-                                ),
-                              )
-                            : basketsProvider.merchantBaskets.isEmpty // Modifie cette ligne
-                                ? Center(
-                                    child: Text(
-                                      "Aucun panier pour ce magasin.",
-                                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                                    ),
-                                  )
-                                : ListView.builder(
-                                    padding: const EdgeInsets.all(16),
-                                    itemCount: basketsProvider.merchantBaskets.length, // Modifie cette ligne
-                                    itemBuilder: (context, index) {
-                                      final basket = basketsProvider.merchantBaskets[index]; // Modifie cette ligne
-                                      return Card(
-                                        margin: const EdgeInsets.only(bottom: 12),
-                                        child: ListTile(
-                                          title: Text(basket.name),
-                                          subtitle: Text(
-                                            'Prix: ${basket.originalPrice}€ • Réduction: ${basket.discountPercentage}%\n'
-                                            'Quantité: ${basket.quantity} • ${basket.description}',
-                                          ),
-                                          trailing: Text(
-                                            basket.category,
-                                            style: const TextStyle(color: Colors.green),
-                                          ),
-                                        ),
-                                      );
-                                    },
+                    : Selector<BasketsProvider, List<MerchantBasket>>(
+                        selector: (_, basketsProvider) => basketsProvider.merchantBaskets,
+                        builder: (context, merchantBaskets, child) {
+                          final basketsProvider = Provider.of<BasketsProvider>(context, listen: false);
+
+                          if (basketsProvider.isLoading) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+
+                          if (error.isNotEmpty) {
+                            return Center(
+                              child: Text(
+                                "Erreur: $error",
+                                style: TextStyle(color: Colors.red[600], fontSize: 16),
+                              ),
+                            );
+                          }
+
+                          if (merchantBaskets.isEmpty) {
+                            return Center(
+                              child: Text(
+                                "Aucun panier pour ce magasin.",
+                                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: merchantBaskets.length,
+                            itemBuilder: (context, index) {
+                              final basket = merchantBaskets[index];
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: ListTile(
+                                  title: Text(basket.name),
+                                  subtitle: Text(
+                                    'Prix: ${basket.originalPrice}€ • Réduction: ${basket.discountPercentage}%\n'
+                                    'Quantité: ${basket.quantity} • ${basket.description}',
                                   ),
+                                  trailing: Text(
+                                    basket.category,
+                                    style: const TextStyle(color: Colors.green),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
               ),
             ],
           ),

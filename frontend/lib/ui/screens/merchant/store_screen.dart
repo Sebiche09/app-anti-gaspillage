@@ -14,7 +14,6 @@ class StoreScreen extends StatelessWidget {
     final cityController = TextEditingController(text: store.city);
     final postalCodeController = TextEditingController(text: store.postalCode); 
     final phoneController = TextEditingController(text: store.phoneNumber);
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

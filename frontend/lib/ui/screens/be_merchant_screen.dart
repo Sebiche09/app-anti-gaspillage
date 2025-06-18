@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../providers/merchant_provider.dart';
 import 'merchant/merchant_screen.dart';
 import 'merchant/add_store_screen.dart';
+import '../../models/merchant_application_status.dart';
+import '../../providers/error_notifier.dart';
+
 
 class BeMerchantScreen extends StatefulWidget {
   const BeMerchantScreen({super.key});
@@ -23,6 +26,7 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
   final TextEditingController _emailProController = TextEditingController();
   final TextEditingController _sirenController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
+
 
   @override
   void initState() {
@@ -88,8 +92,9 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
         );
         _checkExistingApplication();
       } else {
+        final errorNotifier = Provider.of<ErrorNotifier>(context, listen: false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(merchantProvider.errorMessage ?? 'Erreur lors de l\'envoi')),
+          SnackBar(content: Text(errorNotifier.errorMessage ?? 'Erreur lors de l\'envoi')),
         );
       }
     }
@@ -114,9 +119,26 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
               child: _hasExistingApplication 
                 ? _buildExistingApplicationView()
-                : _buildApplicationForm(),
+                : _buildApplicationForm(), // <-- le bouton n'est plus ici
             ),
       ),
+      bottomNavigationBar: !_hasExistingApplication
+          ? Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _submitForm,
+                child: const Text('Envoyer la demande'),
+              ),
+            )
+          : null,
     );
   }
 
@@ -335,18 +357,6 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
                     : null),
           ),
           const SizedBox(height: 30),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: _submitForm,
-            child: const Text('Envoyer la demande'),
-          ),
         ],
       ),
     );
