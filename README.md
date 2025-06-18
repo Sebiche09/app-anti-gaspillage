@@ -25,16 +25,11 @@ git clone https://github.com/Sebiche09/app-anti-gaspillage.git
 
 ### lancer le docker-compose
 docker-compose up -d --build
-
-## OU
-
-### Lancement du programme : 
-- Installer devpod sur la machine : https://devpod.sh/
-- cliquer sur le lien : [![Ouvrir dans devPod!](https://devpod.sh/assets/open-in-devpod.svg)](https://devpod.sh/open#https://github.com/Sebiche09/app-anti-gaspillage)
-- crée le workspace en donnant un nom à l'espace de travail
-- une fois vscode de lancer, si une erreur apparait, simplement faire more actions... fermer vscode et le relancer.
-- une fois dans le terminal , tapper la commande docker-compose up
-Le projet est pret
+docker ps -a
+docker start (le container du backend)
+docker exec -it flutter bash
+flutter pub get
+flutter run --dart-define -d web-server --web-hostname=0.0.0.0 --web-port=8000
 
 ## Licence
 
