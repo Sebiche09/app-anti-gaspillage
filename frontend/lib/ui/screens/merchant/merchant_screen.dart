@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
-import '../../../providers/store_provider.dart'; // ← AJOUT
+import '../../../providers/store_provider.dart'; 
 import '../../../constants/app_colors.dart';
 import 'store_screen.dart';
 import 'basket_screen.dart';

@@ -39,23 +39,26 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
     
     try {
       await merchantProvider.checkApplicationStatus();
-      
-      setState(() {
-        _isLoading = false;
-        _hasExistingApplication = merchantProvider.status != MerchantApplicationStatus.notApplied;
-        _existingApplicationData = merchantProvider.merchantData;
-        
-        if (_hasExistingApplication && _existingApplicationData != null) {
-          _businessNameController.text = _existingApplicationData!['business_name'] ?? '';
-          _emailProController.text = _existingApplicationData!['email_pro'] ?? '';
-          _sirenController.text = _existingApplicationData!['siren'] ?? '';
-          _phoneNumberController.text = _existingApplicationData!['phone_number'] ?? '';
-        }
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasExistingApplication = merchantProvider.status != MerchantApplicationStatus.notApplied;
+          _existingApplicationData = merchantProvider.merchantData;
+          
+          if (_hasExistingApplication && _existingApplicationData != null) {
+            _businessNameController.text = _existingApplicationData!['business_name'] ?? '';
+            _emailProController.text = _existingApplicationData!['email_pro'] ?? '';
+            _sirenController.text = _existingApplicationData!['siren'] ?? '';
+            _phoneNumberController.text = _existingApplicationData!['phone_number'] ?? '';
+          }
+        });
+      }
     } catch (e) {
+    if (mounted) {
       setState(() {
         _isLoading = false;
       });
+    }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur lors de la vérification: ${e.toString()}')),
       );
@@ -74,8 +77,9 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final merchantProvider = Provider.of<MerchantProvider>(context, listen: false);
-      
-      setState(() => _isLoading = true);
+      if (mounted) {
+        setState(() => _isLoading = true);
+      }
       
       final success = await merchantProvider.submitApplication(
         businessName: _businessNameController.text,
@@ -83,8 +87,9 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
         siren: _sirenController.text,
         phoneNumber: _phoneNumberController.text,
       );
-      
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
       
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -202,9 +207,11 @@ class _BeMerchantScreenState extends State<BeMerchantScreen> {
               ),
             ),
             onPressed: () {
-              setState(() {
-                _hasExistingApplication = false;
-              });
+              if (mounted) {
+                setState(() {
+                  _hasExistingApplication = false;
+                });
+              }
             },
             child: const Text('Soumettre une nouvelle demande'),
           ),

@@ -151,7 +151,6 @@ class BasketsProvider with ChangeNotifier {
     required double discountPercentage,
     required int storeId,
     required int quantity,
-    required String category,
     required String description,
   }) async {
     _setLoading(true);
@@ -163,7 +162,6 @@ class BasketsProvider with ChangeNotifier {
         discountPercentage: discountPercentage,
         storeId: storeId,
         quantity: quantity,
-        category: category,
         description: description,
       );
       await fetchBasketsForStore(storeId);

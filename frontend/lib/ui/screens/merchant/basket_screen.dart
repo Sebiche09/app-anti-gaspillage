@@ -22,7 +22,6 @@ class _BasketScreenState extends State<BasketScreen> {
     final nameController = TextEditingController();
     final originalPriceController = TextEditingController();
     final discountController = TextEditingController();
-    final categoryController = TextEditingController();
     final descriptionController = TextEditingController();
     final quantityController = TextEditingController();
 
@@ -53,10 +52,6 @@ class _BasketScreenState extends State<BasketScreen> {
                     decoration: const InputDecoration(labelText: "Pourcentage de réduction"),
                     keyboardType: TextInputType.number,
                     validator: (v) => v == null || v.isEmpty ? "Réduction requise" : null,
-                  ),
-                  TextFormField(
-                    controller: categoryController,
-                    decoration: const InputDecoration(labelText: "Catégorie"),
                   ),
                   TextFormField(
                     controller: descriptionController,
@@ -95,7 +90,6 @@ class _BasketScreenState extends State<BasketScreen> {
                       discountPercentage: double.tryParse(discountController.text) ?? 0,
                       storeId: store.id,
                       quantity:  int.tryParse(quantityController.text) ?? 1,
-                      category: categoryController.text,
                       description: descriptionController.text,
                     );
                     Navigator.pop(context);
@@ -104,7 +98,7 @@ class _BasketScreenState extends State<BasketScreen> {
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Erreur: $e")),
+                      SnackBar(content: Text("Erreur: ${e.toString()}"))
                     );
                   }
                 }
@@ -116,7 +110,16 @@ class _BasketScreenState extends State<BasketScreen> {
       },
     );
   }
-
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final selectedStore = Provider.of<StoreProvider>(context).selectedStore;
+    if (!_basketsLoaded && selectedStore != null) {
+      Provider.of<BasketsProvider>(context, listen: false)
+          .fetchBasketsForStore(selectedStore.id);
+      _basketsLoaded = true;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final errorNotifier = Provider.of<ErrorNotifier>(context);
@@ -127,11 +130,14 @@ class _BasketScreenState extends State<BasketScreen> {
         final stores = storeProvider.stores;
         final selectedStore = storeProvider.selectedStore;
 
-        if (selectedStore != null && !_basketsLoaded) {
-          // Charger les paniers pour le magasin sélectionné
-          Provider.of<BasketsProvider>(context, listen: false).fetchBasketsForStore(selectedStore.id);
-          _basketsLoaded = true;
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_basketsLoaded && selectedStore != null) {
+            Provider.of<BasketsProvider>(context, listen: false).fetchBasketsForStore(selectedStore.id);
+            setState(() {
+              _basketsLoaded = true;
+            });
+          }
+        });
 
         return Scaffold(
           backgroundColor: const Color(0xFFF6EDE3),
@@ -149,10 +155,10 @@ class _BasketScreenState extends State<BasketScreen> {
                 stores: stores,
                 selected: selectedStore,
                 onChanged: (store) {
-                  storeProvider.selectStore(store);
                   setState(() {
-                    _basketsLoaded = false;
-                  });
+                  storeProvider.selectStore(store);
+                  _basketsLoaded = false;
+                });
                 },
               ),
               Expanded(
@@ -199,14 +205,14 @@ class _BasketScreenState extends State<BasketScreen> {
                                 margin: const EdgeInsets.only(bottom: 12),
                                 child: ListTile(
                                   title: Text(basket.name),
-                                  subtitle: Text(
-                                    'Prix: ${basket.originalPrice}€ • Réduction: ${basket.discountPercentage}%\n'
-                                    'Quantité: ${basket.quantity} • ${basket.description}',
-                                  ),
-                                  trailing: Text(
-                                    basket.category,
-                                    style: const TextStyle(color: Colors.green),
-                                  ),
+                                 subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Prix: ${basket.originalPrice}€ • Réduction: ${basket.discountPercentage}%'),
+                                    Text('Quantité: ${basket.quantity}'),
+                                    if (basket.description.isNotEmpty) Text(basket.description),
+                                  ],
+                                ),
                                 ),
                               );
                             },

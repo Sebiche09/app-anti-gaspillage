@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../widgets/common/header.dart';
 import '../../constants/app_colors.dart';
 import '../../providers/basket_provider.dart';
+import '../widgets/mapbox/map_widget.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({Key? key}) : super(key: key);
@@ -13,11 +14,6 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +32,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   isCentered: true,
                 ),
                 const SizedBox(height: 16),
+                Expanded(
+                  child: MapPage(), 
+                  
+                ),
               ],
             );
           },

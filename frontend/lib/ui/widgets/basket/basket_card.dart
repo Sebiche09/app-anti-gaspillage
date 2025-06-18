@@ -34,7 +34,6 @@ class BasketCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image du magasin
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: Stack(
@@ -76,7 +75,6 @@ class BasketCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Infos du magasin
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -100,7 +98,6 @@ class BasketCard extends StatelessWidget {
                 ],
               ),
             ),
-            // Évaluation et prix
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(

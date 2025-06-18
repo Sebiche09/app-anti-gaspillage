@@ -30,7 +30,7 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   void _login() async {
-    if (_isLoggingIn) return; // Éviter les appels multiples
+    if (_isLoggingIn) return;
     
     FocusScope.of(context).unfocus();
 
@@ -42,7 +42,6 @@ class _LoginFormState extends State<LoginForm> {
       try {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         
-        // Vérifier si le provider est encore valide
         if (!authProvider.hasListeners) {
           if (mounted) {
             setState(() {
@@ -64,11 +63,10 @@ class _LoginFormState extends State<LoginForm> {
         });
 
         if (result == null) {
-          // Connexion réussie - utiliser pushNamedAndRemoveUntil pour éviter les problèmes de navigation
           Navigator.pushNamedAndRemoveUntil(
             context,
             authProvider.isMerchant ? TextLogin.merchantRoute : TextLogin.homeRoute,
-            (route) => false, // Supprimer toutes les routes précédentes
+            (route) => false, 
           );
         } else if (result == TextLogin.confirmEmailCode) {
           Navigator.pushNamedAndRemoveUntil(
@@ -123,7 +121,6 @@ class _LoginFormState extends State<LoginForm> {
           key: _formKey,
           child: Column(
             children: [
-              // Champ email
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -150,7 +147,6 @@ class _LoginFormState extends State<LoginForm> {
               ),
               const SizedBox(height: 16),
 
-              // Champ mot de passe
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -187,7 +183,6 @@ class _LoginFormState extends State<LoginForm> {
               ),
               const SizedBox(height: 24),
 
-              // Bouton de connexion
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -214,10 +209,8 @@ class _LoginFormState extends State<LoginForm> {
 
               const SizedBox(height: 16),
 
-              // Lien mot de passe oublié
               TextButton(
                 onPressed: isLoading ? null : () {
-                  // Implémentation du mot de passe oublié
                 },
                 child: const Text(
                   TextLogin.forgotPassword,
@@ -227,7 +220,6 @@ class _LoginFormState extends State<LoginForm> {
 
               const SizedBox(height: 24),
 
-              // Message d'erreur
               if (authProvider.status == AuthStatus.error && authProvider.errorMessage != null)
                 Container(
                   padding: const EdgeInsets.all(12),

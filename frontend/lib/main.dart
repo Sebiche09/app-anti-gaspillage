@@ -128,7 +128,6 @@ void main() async {
   );
 }
 
-// Fonction sécurisée pour gérer l'expiration de session
 void _handleSessionExpired(BuildContext context, AuthProvider authProvider) {
   // Vérifier si le context est encore valide et monté
   if (!context.mounted) return;

@@ -25,7 +25,6 @@ class _RegisterFormState extends State<RegisterForm> {
 
   @override
   void dispose() {
-    // Libération des ressources
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -40,7 +39,6 @@ class _RegisterFormState extends State<RegisterForm> {
       );
 
       if (success && mounted) {
-        // Appeler le callback avec l'email
         widget.onRegistrationSuccess?.call(_emailController.text.trim());
       }
     }
@@ -56,7 +54,6 @@ class _RegisterFormState extends State<RegisterForm> {
       key: _formKey,
       child: Column(
         children: [
-          // Champ email
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
@@ -82,7 +79,6 @@ class _RegisterFormState extends State<RegisterForm> {
             },
           ),
           const SizedBox(height: 16),
-          // Champ mot de passe
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
@@ -118,7 +114,6 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 24),
 
-          // Bouton d'inscription
           SizedBox(
             width: double.infinity,
             height: 50,

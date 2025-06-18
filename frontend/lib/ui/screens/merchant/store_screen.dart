@@ -70,8 +70,8 @@ Widget build(BuildContext context) {
               MaterialPageRoute(builder: (context) => const AddStoreScreen()),
             );
           },
-          backgroundColor: Colors.grey[900],
-          child: const Icon(Icons.add, color: Colors.white),
+          backgroundColor: Colors.green[900],
+          child: const Icon(Icons.add, color: Colors.black),
           tooltip: "Ajouter un magasin",
         ),
         body: Column(

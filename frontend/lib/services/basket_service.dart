@@ -63,7 +63,6 @@ class BasketService {
     required double discountPercentage,
     required int storeId,
     required int quantity,
-    required String category,
     required String description,
   }) async {
     try {
@@ -73,7 +72,6 @@ class BasketService {
         "discount_percentage": discountPercentage,
         "store_id": storeId,
         "quantity": quantity,
-        "category": category,
         "description": description,
       });
     } catch (e) {
