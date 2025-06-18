@@ -48,6 +48,7 @@ func (h *BasketHandler) GetBaskets(c *gin.Context) {
 			Longitude:          basket.Store.Longitude,
 			Address:            basket.Store.Address,
 			Rating:             basket.Store.Rating,
+			Description:        basket.Description,
 			OriginalPrice:      basket.OriginalPrice,
 			DiscountPercentage: basket.DiscountPercentage,
 			Category:           basket.Store.Category.Name,

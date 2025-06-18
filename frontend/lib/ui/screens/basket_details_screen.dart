@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/basket.dart';
 
-
 class BasketDetailsScreen extends StatefulWidget {
   final Basket basket;
 
@@ -17,6 +16,32 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Le bouton d'achat est fixé en bas
+      bottomNavigationBar: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        color: Colors.white,
+        child: ElevatedButton(
+          onPressed: () {
+            // Action d'achat
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3B4929),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text(
+            'Buy Now',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Stack(
@@ -155,7 +180,7 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                     horizontal: 24.0,
                     vertical: 30.0,
                   ),
-                    child: Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 10),
@@ -168,7 +193,7 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.basket.name,
+                                  ('test'),
                                   style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -190,7 +215,7 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                '\$${(widget.basket.originalPrice ?? 0).toStringAsFixed(1)}',
+                                '${(widget.basket.originalPrice ?? 0).toStringAsFixed(1)} €',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   decoration: TextDecoration.lineThrough,
@@ -198,7 +223,7 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                                 ),
                               ),
                               Text(
-                                '\$${widget.basket.discountPrice.toStringAsFixed(1)}',
+                                '${(widget.basket.originalPrice * (1 - widget.basket.discountPercentage / 100)).toStringAsFixed(1)} €',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -213,9 +238,9 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                       const SizedBox(height: 16),
 
                       Container(
-                        height: 1,  
+                        height: 1,
                         width: double.infinity,
-                        color: Colors.grey.withOpacity(0.3),  
+                        color: Colors.grey.withOpacity(0.3),
                       ),
 
                       const SizedBox(height: 16),
@@ -223,46 +248,45 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
 
                       Padding(
                         padding: const EdgeInsets.only(right: 16.0),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.orange,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.shopping_basket,
-                                  color: Colors.white,
-                                ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.orange,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Basket Title',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Lorem ipsum is simply dummy text of the printing and typesetting industry.',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              child: const Icon(
+                                Icons.shopping_basket,
+                                color: Colors.white,
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.basket.name,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    widget.basket.description,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-
 
                       const SizedBox(height: 20),
 
@@ -271,96 +295,103 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: [
-                            _buildTabButton('Ingredients'),
+                            _buildTabButton('Note du commerçant'),
                             const SizedBox(width: 10),
-                            _buildTabButton('Allergies'),
+                            _buildTabButton('Ingrédients & Allergènes'),
                             const SizedBox(width: 10),
                             _buildTabButton('Images'),
                             const SizedBox(width: 10),
-                            _buildTabButton('Timeline'),
+                            _buildTabButton('Localisation'),
                           ],
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // Contenu basé sur l'onglet sélectionné
-                      if (_activeTab == 'Ingredients')
-                        _buildIngredientsSection(),
-                      if (_activeTab == 'Allergies')
-                        _buildAllergiesSection(),
-                      if (_activeTab == 'Images')
-                        _buildImagesSection(),
-                      if (_activeTab == 'Timeline')
-                        _buildTimelineSection(),
-
-                      const SizedBox(height: 20),
-
-                      // Carte de localisation
-                      Container(
-                        height: 150,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Center(
+                      if (_activeTab == 'Note du commerçant')
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFFF8D23),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.location_on,
-                                  color: Colors.white,
-                                  size: 16,
+                              const Text(
+                                'Note du commerçant',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                '500m away',
-                                style: TextStyle(
-                                  color: Color(0xFFFF8D23),
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                'Le commerçant est très apprécié pour la qualité de ses produits et son service.',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: List.generate(5, (index) {
+                                  return Icon(
+                                    Icons.star,
+                                    color: index < 4 ? Colors.orange : Colors.grey,
+                                    size: 20,
+                                  );
+                                }),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                      if (_activeTab == 'Ingrédients & Allergènes')
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'Ceci est un panier surprise, les ingrédients et allergènes ne sont pas connus à l\'avance. '
+                            'Pour toute question, merci de demander au commerçant lors de la collecte.',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      if (_activeTab == 'Images')
+                        _buildImagesSection(),
+                      if (_activeTab == 'Localisation')
+                        Container(
+                          height: 150,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFF8D23),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.location_on,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  '500m away',
+                                  style: TextStyle(
+                                    color: Color(0xFFFF8D23),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
               ],
-            ),
-          ),
-
-          // Bouton d'achat
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                // Action d'achat
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3B4929),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('Buy Now',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
             ),
           ),
         ],
@@ -411,7 +442,6 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-
                   'Ingredient Name',
                   style: TextStyle(
                     fontSize: 11,
@@ -433,22 +463,9 @@ class _BasketDetailsScreenState extends State<BasketDetailsScreen> {
       ),
     );
   }
-
-  Widget _buildAllergiesSection() {
-    return const Center(
-      child: Text('Allergies Information will be shown here'),
-    );
-  }
-
   Widget _buildImagesSection() {
     return const Center(
-      child: Text('Images will be shown here'),
-    );
-  }
-
-  Widget _buildTimelineSection() {
-    return const Center(
-      child: Text('Timeline information will be shown here'),
+      child: Text('Des images du panier seront affichées ici'),
     );
   }
 }

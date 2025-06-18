@@ -120,7 +120,7 @@ class BasketCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '\$${(basket.originalPrice ?? 0).toStringAsFixed(1)}',
+                    '${(basket.originalPrice ?? 0).toStringAsFixed(1)} €',
                     style: const TextStyle(
                       color: AppColors.border,
                       decoration: TextDecoration.lineThrough,
@@ -129,9 +129,9 @@ class BasketCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '\$${(basket.originalPrice ?? 0).toStringAsFixed(1)}',
+                    '${(basket.originalPrice * (1 - basket.discountPercentage / 100)).toStringAsFixed(1)} €',
                     style: const TextStyle(
-                      color: AppColors.secondary, //
+                      color: AppColors.secondary,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
